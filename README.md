@@ -93,3 +93,21 @@ Một số trang của hệ thống.
 | <img src="https://user-images.githubusercontent.com/60851390/228582148-8504fa75-e15f-42cf-aa15-ea4ddc01226e.png" alt="Chat" width="200" />                       | <img src="https://user-images.githubusercontent.com/60851390/228582153-99a4f8ec-0732-41ca-ac28-946fd6902b9f.png" alt="Reward" width="200" />                    | <img src="https://user-images.githubusercontent.com/60851390/228582158-878a58ce-a619-4e99-b487-ce2b61729eab.png" alt="Admin Dashboard" width="200" /> |
 | <img src="https://user-images.githubusercontent.com/60851390/228582171-065d1f52-3afb-45c8-a26c-fe868ed095b3.png" alt="Product Management" width="200" />         | <img src="https://user-images.githubusercontent.com/60851390/228582179-9ed67879-4cc4-49f1-96f7-fa120d07773e.png" alt="Create Product" width="200" />            | <img src="https://user-images.githubusercontent.com/60851390/228582184-16dcdfe8-d3f6-4ff3-a603-3d9513debeee.png" alt="Update Order" width="200" />    |
 | <img src="https://user-images.githubusercontent.com/60851390/228582189-48d83ff4-ac83-4d3f-83f2-435d3ca00f3b.png" alt="Reward Strategy Management" width="200" /> | <img src="https://user-images.githubusercontent.com/60851390/228582195-9bcfe194-21e3-4941-a2a5-c9d78c05950d.png" alt="Payment Method Management" width="200" /> | <img src="https://user-images.githubusercontent.com/60851390/228582203-e4e5eb14-9e25-4f2c-8936-c0373eea5d2f.png" alt="Admin Chat" width="200" />      |
+
+
+# Hướng dẫn chạy dự án 
+## Chạy client ( react ) - chạy tại https://localhost:3000
+```bash
+cd electro-client
+$env:HTTPS="true"; 
+npm install
+npm start
+```
+
+## Chạy Server (Spring Boot)
+```bash
+cd electro-server
+$env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-11.0.29.7-hotspot"
+$env:PATH="$env:JAVA_HOME\bin;$env:PATH"
+mvn spring-boot:run
+
