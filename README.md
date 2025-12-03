@@ -96,7 +96,7 @@ Một số trang của hệ thống.
 
 
 # Hướng dẫn chạy dự án 
-## Chạy client ( react ) - chạy tại https://localhost:3000
+## Chạy client ( react ) - chạy tại https://localhost:3000 - đã bật https
 ```bash
 cd electro-client
 $env:HTTPS="true"; 
@@ -104,10 +104,30 @@ npm install
 npm start
 ```
 
-## Chạy Server (Spring Boot)
+## Chạy Server (Spring Boot) - nếu đã cấu hình https rồi, chưa thì xem tiếp phía dưới
 ```bash
 cd electro-server
 $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-11.0.29.7-hotspot"
 $env:PATH="$env:JAVA_HOME\bin;$env:PATH"
 mvn spring-boot:run
+```
+## Cấu hình HTTPS cho backend
+1. Mở terminal tại thư mục `electro-server/src/main/resources`.
+2. Tạo file keystore bằng lệnh:
+   ```bash
+   keytool -genkeypair -alias electro -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore electro-keystore.p12 -validity 3650
+   ```
+3. Thêm cấu hình sau vào `application.properties`:
+   ```properties
+   server.port=8443
+   server.ssl.enabled=true
+   server.ssl.key-store=classpath:electro-keystore.p12
+   server.ssl.key-store-password=<mật khẩu bạn đã nhập>
+   server.ssl.key-store-type=PKCS12
+   server.ssl.key-alias=electro
+   ```
+4. Khởi động lại backend.
+
+## Lưu ý
+ Nếu dùng chứng chỉ tự ký, trình duyệt sẽ cảnh báo "Not secure" khi truy cập local, nhưng dữ liệu vẫn được mã hóa.
 
