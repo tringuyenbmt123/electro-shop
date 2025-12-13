@@ -1,4 +1,4 @@
-> Cân nhắc! Project này có sử dụng một số kỹ thuật mang tính hacking như lớp GenericMappingRegister vì yêu cầu tiến độ, do đó chỉ nên tham khảo, không nên áp dụng trong thực tế. Ngoài ra, còn một số vấn đề chưa giải quyết như việc một số controller có inject repository, hướng dẫn cài đặt, và nhiều lỗi khác.
+<img width="518" height="165" alt="image" src="https://github.com/user-attachments/assets/1e063056-7d51-4820-a225-87fd33394f44" />> Cân nhắc! Project này có sử dụng một số kỹ thuật mang tính hacking như lớp GenericMappingRegister vì yêu cầu tiến độ, do đó chỉ nên tham khảo, không nên áp dụng trong thực tế. Ngoài ra, còn một số vấn đề chưa giải quyết như việc một số controller có inject repository, hướng dẫn cài đặt, và nhiều lỗi khác.
 
 # Giới thiệu
 
@@ -57,6 +57,8 @@ cd electro-server
 $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-11.0.29.7-hotspot"
 $env:PATH="$env:JAVA_HOME\bin;$env:PATH"
 mvn spring-boot:run
+
+truy cập : https://localhost:8443/ để xác nhận chữ kí --> reload lại giao diện 
 ```
 ## Cấu hình HTTPS cho backend
 1. Mở terminal tại thư mục `electro-server/src/main/resources`.
@@ -79,6 +81,4 @@ mvn spring-boot:run
 ## Lưu ý
 Nếu dùng chứng chỉ tự ký, trình duyệt sẽ cảnh báo "Not secure" khi truy cập local, nhưng dữ liệu vẫn được mã hóa.                                                                     OK
 
-## Lưu ý
- Nếu dùng chứng chỉ tự ký, trình duyệt sẽ cảnh báo "Not secure" khi truy cập local, nhưng dữ liệu vẫn được mã hóa.
 
