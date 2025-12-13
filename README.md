@@ -1,4 +1,4 @@
-<img width="518" height="165" alt="image" src="https://github.com/user-attachments/assets/1e063056-7d51-4820-a225-87fd33394f44" />> Cân nhắc! Project này có sử dụng một số kỹ thuật mang tính hacking như lớp GenericMappingRegister vì yêu cầu tiến độ, do đó chỉ nên tham khảo, không nên áp dụng trong thực tế. Ngoài ra, còn một số vấn đề chưa giải quyết như việc một số controller có inject repository, hướng dẫn cài đặt, và nhiều lỗi khác.
+Cân nhắc! Project này có sử dụng một số kỹ thuật mang tính hacking như lớp GenericMappingRegister vì yêu cầu tiến độ, do đó chỉ nên tham khảo, không nên áp dụng trong thực tế. Ngoài ra, còn một số vấn đề chưa giải quyết như việc một số controller có inject repository, hướng dẫn cài đặt, và nhiều lỗi khác.
 
 # Giới thiệu
 
