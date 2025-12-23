@@ -104,6 +104,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/error",
                         "/favicon.ico",
                         "/robots.txt",
+                        "/ws",
+                        "/ws/**",
                         "/.well-known/**",
                         "/swagger-ui.html",
                         "/swagger-ui/**",

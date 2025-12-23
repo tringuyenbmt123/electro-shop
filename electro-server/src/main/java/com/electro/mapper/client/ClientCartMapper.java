@@ -12,7 +12,6 @@ import com.electro.entity.general.Image;
 import com.electro.entity.product.Product;
 import com.electro.entity.product.Variant;
 import com.electro.mapper.promotion.PromotionMapper;
-import com.electro.repository.authentication.UserRepository;
 import com.electro.repository.inventory.DocketVariantRepository;
 import com.electro.repository.product.VariantRepository;
 import com.electro.repository.promotion.PromotionRepository;
@@ -32,7 +31,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ClientCartMapper {
 
-    private UserRepository userRepository;
     private VariantRepository variantRepository;
     private DocketVariantRepository docketVariantRepository;
     private PromotionRepository promotionRepository;
@@ -40,7 +38,6 @@ public class ClientCartMapper {
 
     public Cart requestToEntity(ClientCartRequest request) {
         var entity = new Cart();
-        entity.setUser(userRepository.getById(request.getUserId()));
         entity.setCartVariants(request.getCartItems().stream().map(this::requestToEntity).collect(Collectors.toSet()));
         entity.setStatus(request.getStatus());
         attach(entity);

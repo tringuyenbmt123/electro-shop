@@ -3,7 +3,6 @@ package com.electro.mapper.client;
 import com.electro.dto.client.ClientPreorderRequest;
 import com.electro.dto.client.ClientPreorderResponse;
 import com.electro.entity.client.Preorder;
-import com.electro.repository.authentication.UserRepository;
 import com.electro.repository.product.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,13 +14,11 @@ import java.util.Collections;
 @AllArgsConstructor
 public class ClientPreorderMapper {
 
-    private UserRepository userRepository;
     private ProductRepository productRepository;
     private ClientProductMapper clientProductMapper;
 
     public Preorder requestToEntity(ClientPreorderRequest request) {
         Preorder entity = new Preorder();
-        entity.setUser(userRepository.getById(request.getUserId()));
         entity.setProduct(productRepository.getById(request.getProductId()));
         entity.setStatus(request.getStatus());
         return entity;

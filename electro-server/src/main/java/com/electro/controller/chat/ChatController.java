@@ -30,6 +30,8 @@ public class ChatController {
 
     @MessageMapping("/{roomId}")
     public void sendMessage(@DestinationVariable String roomId, @Payload MessageRequest message) {
+        // Do not trust roomId from client payload
+        message.setRoomId(Long.valueOf(roomId));
         MessageResponse messageResponse = messageService.save(message);
         simpMessagingTemplate.convertAndSend("/chat/receive/" + roomId, messageResponse);
     }

@@ -28,8 +28,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
-
-            log.info("JWT after parse {}", jwt);
+            if (log.isDebugEnabled()) {
+                log.debug("JWT parsed: {}", jwt != null);
+            }
 
             if (jwt != null && jwtUtil.validateJwtToken(jwt)) {
                 // Lấy username từ JWT
@@ -53,8 +54,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
-
-        log.info("JWT from request {}", headerAuth);
+        if (log.isDebugEnabled()) {
+            log.debug("Authorization header present: {}", StringUtils.hasText(headerAuth));
+        }
 
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
             return headerAuth.substring(7);

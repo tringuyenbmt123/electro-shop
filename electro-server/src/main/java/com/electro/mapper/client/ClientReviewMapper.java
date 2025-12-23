@@ -4,7 +4,6 @@ import com.electro.dto.client.ClientReviewRequest;
 import com.electro.dto.client.ClientReviewResponse;
 import com.electro.dto.client.ClientSimpleReviewResponse;
 import com.electro.entity.review.Review;
-import com.electro.repository.authentication.UserRepository;
 import com.electro.repository.product.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,13 +14,11 @@ import java.util.Collections;
 @AllArgsConstructor
 public class ClientReviewMapper {
 
-    private UserRepository userRepository;
     private ProductRepository productRepository;
     private ClientProductMapper clientProductMapper;
 
     public Review requestToEntity(ClientReviewRequest request) {
         Review entity = new Review();
-        entity.setUser(userRepository.getById(request.getUserId()));
         entity.setProduct(productRepository.getById(request.getProductId()));
         entity.setRatingScore(request.getRatingScore());
         entity.setContent(request.getContent());

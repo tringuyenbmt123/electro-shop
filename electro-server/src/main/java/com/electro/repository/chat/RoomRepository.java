@@ -10,4 +10,6 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
 
     Optional<Room> findByUserUsername(String username);
 
+    boolean existsByIdAndUser_Username(Long id, String username);
+
 }
