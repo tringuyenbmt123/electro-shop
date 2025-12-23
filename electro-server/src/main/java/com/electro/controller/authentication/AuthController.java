@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -100,13 +101,16 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(new ObjectNode(JsonNodeFactory.instance));
     }
 
-    @GetMapping("/forgot-password")
-    public ResponseEntity<ObjectNode> forgotPassword(@RequestParam String email) {
+    // Changed from GET to POST to prevent email exposure in URL/logs
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ObjectNode> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
         verificationService.forgetPassword(email);
+        // Always return success to prevent email enumeration
         return ResponseEntity.status(HttpStatus.OK).body(new ObjectNode(JsonNodeFactory.instance));
     }
 
-    @PutMapping("/reset-password")
+    @PostMapping("/reset-password")
     public ResponseEntity<ObjectNode> resetPassword(@RequestBody ResetPasswordRequest resetPassword) {
         verificationService.resetPassword(resetPassword);
         return ResponseEntity.status(HttpStatus.OK).body(new ObjectNode(JsonNodeFactory.instance));

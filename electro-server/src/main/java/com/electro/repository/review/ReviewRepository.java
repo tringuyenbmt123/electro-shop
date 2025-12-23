@@ -15,14 +15,18 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, JpaSpecif
     default Page<Review> findAllByProductSlug(String productSlug, String sort, String filter, Pageable pageable) {
         Specification<Review> sortable = RSQLJPASupport.toSort(sort);
         Specification<Review> filterable = RSQLJPASupport.toSpecification(filter);
-        Specification<Review> productIdSpec = RSQLJPASupport.toSpecification("product.slug==" + productSlug);
-        return findAll(sortable.and(filterable).and(productIdSpec), pageable);
+        // Safe specification using Criteria API to prevent injection
+        Specification<Review> productSlugSpec = (root, query, cb) -> 
+            cb.equal(root.get("product").get("slug"), productSlug);
+        return findAll(sortable.and(filterable).and(productSlugSpec), pageable);
     }
 
     default Page<Review> findAllByUsername(String username, String sort, String filter, Pageable pageable) {
         Specification<Review> sortable = RSQLJPASupport.toSort(sort);
         Specification<Review> filterable = RSQLJPASupport.toSpecification(filter);
-        Specification<Review> usernameSpec = RSQLJPASupport.toSpecification("user.username==" + username);
+        // Safe specification using Criteria API to prevent injection
+        Specification<Review> usernameSpec = (root, query, cb) -> 
+            cb.equal(root.get("user").get("username"), username);
         return findAll(sortable.and(filterable).and(usernameSpec), pageable);
     }
 

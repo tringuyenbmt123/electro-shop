@@ -7,9 +7,11 @@ import com.electro.dto.ListResponse;
 import com.electro.dto.general.EventInitiationResponse;
 import com.electro.dto.general.NotificationRequest;
 import com.electro.dto.general.NotificationResponse;
+import com.electro.entity.authentication.User;
 import com.electro.entity.general.Notification;
 import com.electro.exception.ResourceNotFoundException;
 import com.electro.mapper.general.NotificationMapper;
+import com.electro.repository.authentication.UserRepository;
 import com.electro.repository.general.NotificationRepository;
 import com.electro.service.general.EmitterService;
 import com.electro.service.general.NotificationService;
@@ -46,6 +48,7 @@ public class ClientNotificationController {
     private final NotificationMapper notificationMapper;
     private final EmitterService emitterService;
     private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<ListResponse<NotificationResponse>> getAllNotifications(
@@ -86,9 +89,12 @@ public class ClientNotificationController {
 
     @PutMapping("/{id}")
     public ResponseEntity<NotificationResponse> updateNotification(@PathVariable Long id,
-                                                                   @RequestBody NotificationRequest request) {
+                                                                   @RequestBody NotificationRequest request,
+                                                                   Authentication authentication) {
+        String username = authentication.getName();
         NotificationResponse notificationResponse = notificationRepository
                 .findById(id)
+                .filter(notification -> notification.getUser().getUsername().equals(username)) // Check ownership
                 .map(existingEntity -> notificationMapper.partialUpdate(existingEntity, request))
                 .map(notificationRepository::save)
                 .map(notificationMapper::entityToResponse)
@@ -96,11 +102,22 @@ public class ClientNotificationController {
         return ResponseEntity.status(HttpStatus.OK).body(notificationResponse);
     }
 
+    // NOTE: This endpoint should ideally be restricted to ADMIN/EMPLOYEE only
+    // or moved to internal service. Keeping for backward compatibility but adding validation.
     @PostMapping("/push-events")
-    public ResponseEntity<NotificationResponse> pushNotification(@RequestBody NotificationRequest request) {
-        Notification notification = notificationRepository.save(notificationMapper.requestToEntity(request));
+    public ResponseEntity<NotificationResponse> pushNotification(@RequestBody NotificationRequest request,
+                                                                 Authentication authentication) {
+        String username = authentication.getName();
+        
+        // Only allow users to send notifications to themselves (prevent abuse)
+        Notification notification = notificationMapper.requestToEntity(request);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.USER, FieldName.USERNAME, username));
+        notification.setUser(user);
+        
+        notification = notificationRepository.save(notification);
         NotificationResponse notificationResponse = notificationMapper.entityToResponse(notification);
-        notificationService.pushNotification(notification.getUser().getUsername(), notificationResponse);
+        notificationService.pushNotification(username, notificationResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(notificationResponse);
     }
 

@@ -116,6 +116,9 @@ public class User extends BaseEntity {
     @Column(name = "reset_password_token")
     private String resetPasswordToken;
 
+    @Column(name = "reset_password_token_expiry")
+    private java.time.Instant resetPasswordTokenExpiry;
+
     @OneToMany(mappedBy = "user")
     private List<RewardLog> rewardLogs = new ArrayList<>();
 }

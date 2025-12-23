@@ -106,6 +106,7 @@ CREATE TABLE user
     avatar               VARCHAR(255)          NULL,
     status               TINYINT               NOT NULL,
     reset_password_token VARCHAR(255)          NULL,
+    reset_password_token_expiry DATETIME(6)    NULL,
     CONSTRAINT pk_user PRIMARY KEY (id)
 );
 

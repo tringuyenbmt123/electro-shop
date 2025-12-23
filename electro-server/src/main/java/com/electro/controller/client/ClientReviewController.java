@@ -10,6 +10,7 @@ import com.electro.dto.client.ClientSimpleReviewResponse;
 import com.electro.entity.review.Review;
 import com.electro.exception.ResourceNotFoundException;
 import com.electro.mapper.client.ClientReviewMapper;
+import com.electro.repository.authentication.UserRepository;
 import com.electro.repository.review.ReviewRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/client-api/reviews")
@@ -39,6 +42,7 @@ public class ClientReviewController {
 
     private ReviewRepository reviewRepository;
     private ClientReviewMapper clientReviewMapper;
+    private UserRepository userRepository;
 
     @GetMapping("/products/{productSlug}")
     public ResponseEntity<ListResponse<ClientSimpleReviewResponse>> getAllReviewsByProduct(
@@ -68,15 +72,24 @@ public class ClientReviewController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientReviewResponse> createReview(@RequestBody ClientReviewRequest request) {
-        Review entity = reviewRepository.save(clientReviewMapper.requestToEntity(request));
+    public ResponseEntity<ClientReviewResponse> createReview(@RequestBody ClientReviewRequest request, 
+                                                             Authentication authentication) {
+        String username = authentication.getName();
+        Review entity = clientReviewMapper.requestToEntity(request);
+        // Set authenticated user - prevent IDOR
+        entity.setUser(userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.USER, FieldName.USERNAME, username)));
+        entity = reviewRepository.save(entity);
         return ResponseEntity.status(HttpStatus.CREATED).body(clientReviewMapper.entityToResponse(entity));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ClientReviewResponse> updateReview(@PathVariable Long id,
-                                                             @RequestBody ClientReviewRequest request) {
+                                                             @RequestBody ClientReviewRequest request,
+                                                             Authentication authentication) {
+        String username = authentication.getName();
         ClientReviewResponse clientReviewResponse = reviewRepository.findById(id)
+                .filter(review -> review.getUser().getUsername().equals(username)) // Check ownership
                 .map(existingEntity -> clientReviewMapper.partialUpdate(existingEntity, request))
                 .map(reviewRepository::save)
                 .map(clientReviewMapper::entityToResponse)
@@ -85,8 +98,17 @@ public class ClientReviewController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteReviews(@RequestBody List<Long> ids) {
-        reviewRepository.deleteAllById(ids);
+    public ResponseEntity<Void> deleteReviews(@RequestBody List<Long> ids, Authentication authentication) {
+        String username = authentication.getName();
+        // Only delete reviews belonging to the authenticated user - prevent IDOR
+        List<Long> validIds = ids.stream()
+                .map(reviewRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(review -> review.getUser().getUsername().equals(username))
+                .map(Review::getId)
+                .collect(Collectors.toList());
+        reviewRepository.deleteAllById(validIds);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

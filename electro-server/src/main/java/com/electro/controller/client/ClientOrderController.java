@@ -69,15 +69,31 @@ public class ClientOrderController {
     }
 
     @GetMapping("/{code}")
-    public ResponseEntity<ClientOrderDetailResponse> getOrder(@PathVariable String code) {
-        ClientOrderDetailResponse clientOrderDetailResponse = orderRepository.findByCode(code)
-                .map(clientOrderMapper::entityToDetailResponse)
+    public ResponseEntity<ClientOrderDetailResponse> getOrder(@PathVariable String code, Authentication authentication) {
+        String username = authentication.getName();
+        Order order = orderRepository.findByCode(code)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ORDER, FieldName.ORDER_CODE, code));
+        
+        // Check ownership - prevent IDOR
+        if (!order.getUser().getUsername().equals(username)) {
+            throw new ResourceNotFoundException(ResourceName.ORDER, FieldName.ORDER_CODE, code);
+        }
+        
+        ClientOrderDetailResponse clientOrderDetailResponse = clientOrderMapper.entityToDetailResponse(order);
         return ResponseEntity.status(HttpStatus.OK).body(clientOrderDetailResponse);
     }
 
     @PutMapping("/cancel/{code}")
-    public ResponseEntity<ObjectNode> cancelOrder(@PathVariable String code) {
+    public ResponseEntity<ObjectNode> cancelOrder(@PathVariable String code, Authentication authentication) {
+        String username = authentication.getName();
+        Order order = orderRepository.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.ORDER, FieldName.ORDER_CODE, code));
+        
+        // Check ownership - prevent IDOR
+        if (!order.getUser().getUsername().equals(username)) {
+            throw new ResourceNotFoundException(ResourceName.ORDER, FieldName.ORDER_CODE, code);
+        }
+        
         orderService.cancelOrder(code);
         return ResponseEntity.status(HttpStatus.OK).body(new ObjectNode(JsonNodeFactory.instance));
     }

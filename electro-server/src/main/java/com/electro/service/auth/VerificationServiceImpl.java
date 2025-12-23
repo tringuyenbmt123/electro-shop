@@ -188,32 +188,57 @@ public class VerificationServiceImpl implements VerificationService {
 
     @Override
     public void forgetPassword(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email doesn't exist"));
+        // Always return success message to prevent email enumeration
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            
+            if (user.getStatus() == 1) {
+                // Generate cryptographically secure token (40 characters)
+                String token = RandomString.make(40);
+                user.setResetPasswordToken(token);
+                // Set token expiry time (15 minutes from now)
+                user.setResetPasswordTokenExpiry(Instant.now().plus(15, ChronoUnit.MINUTES));
+                userRepository.save(user);
 
-        if (user.getStatus() == 1) {
-            String token = RandomString.make(10);
-            user.setResetPasswordToken(token);
-            userRepository.save(user);
-
-            String link = MessageFormat.format("{0}/change-password?token={1}&email={2}", AppConstants.FRONTEND_HOST, token, email);
-            emailSenderService.sendForgetPasswordToken(user.getEmail(), Map.of("link", link));
-        } else {
-            throw new VerificationException("Account is not activated");
+                String link = MessageFormat.format("{0}/change-password?token={1}&email={2}", 
+                        AppConstants.FRONTEND_HOST, token, email);
+                emailSenderService.sendForgetPasswordToken(user.getEmail(), Map.of("link", link));
+            }
         }
+        
+        // Always return without error to prevent email enumeration
     }
 
     @Override
     public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
         User user = userRepository
                 .findByEmailAndResetPasswordToken(resetPasswordRequest.getEmail(), resetPasswordRequest.getToken())
-                .orElseThrow(() -> new RuntimeException("Email and/or token are invalid"));
+                .orElseThrow(() -> new RuntimeException("Invalid or expired reset token"));
+        
+        // Check if token is expired
+        if (user.getResetPasswordTokenExpiry() != null && 
+            user.getResetPasswordTokenExpiry().isBefore(Instant.now())) {
+            throw new RuntimeException("Reset token has expired");
+        }
+        
+        // Update password
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
+        
+        // Clear reset token and expiry after use (one-time use)
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
+        
         userRepository.save(user);
     }
 
     private String generateVerificationToken() {
-        Random random = new Random();
-        return String.format("%04d", random.nextInt(10000));
+        // Use SecureRandom for cryptographically strong random token
+        // Generate 6-digit token (100000-999999) for better security than 4-digit
+        java.security.SecureRandom secureRandom = new java.security.SecureRandom();
+        int token = 100000 + secureRandom.nextInt(900000);
+        return String.valueOf(token);
     }
 
 }

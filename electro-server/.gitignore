@@ -36,7 +36,30 @@ build/
 /image-dir/
 /src/main/java/com/electro/Test.java
 
-# Không đẩy các file chứa mật khẩu thật lên Git
+# =============================================================================
+# SECURITY: DO NOT COMMIT SENSITIVE FILES
+# =============================================================================
+# Environment files with secrets
+.env
+.env.local
+.env.*.local
+
+# Property files with credentials (use .env instead)
 src/main/resources/application.properties
 src/main/resources/application-dev.properties
 src/main/resources/application-local.properties
+src/main/resources/application-prod.properties
+
+# Keystores and certificates
+*.p12
+*.jks
+*.pfx
+*.pem
+*.key
+*.crt
+
+# Backup files that might contain secrets
+*.bak
+*.backup
+*.old
+*_backup.*

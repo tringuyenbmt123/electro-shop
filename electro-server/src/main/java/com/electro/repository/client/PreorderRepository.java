@@ -16,7 +16,9 @@ public interface PreorderRepository extends JpaRepository<Preorder, Long>, JpaSp
     default Page<Preorder> findAllByUsername(String username, String sort, String filter, Pageable pageable) {
         Specification<Preorder> sortable = RSQLJPASupport.toSort(sort);
         Specification<Preorder> filterable = RSQLJPASupport.toSpecification(filter);
-        Specification<Preorder> usernameSpec = RSQLJPASupport.toSpecification("user.username==" + username);
+        // Safe specification using Criteria API to prevent injection
+        Specification<Preorder> usernameSpec = (root, query, cb) -> 
+            cb.equal(root.get("user").get("username"), username);
         return findAll(sortable.and(filterable).and(usernameSpec), pageable);
     }
 

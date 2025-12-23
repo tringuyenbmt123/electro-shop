@@ -16,7 +16,9 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     default Page<Order> findAllByUsername(String username, String sort, String filter, Pageable pageable) {
         Specification<Order> sortable = RSQLJPASupport.toSort(sort);
         Specification<Order> filterable = RSQLJPASupport.toSpecification(filter);
-        Specification<Order> usernameSpec = RSQLJPASupport.toSpecification("user.username==" + username);
+        // Safe specification using Criteria API to prevent injection
+        Specification<Order> usernameSpec = (root, query, cb) -> 
+            cb.equal(root.get("user").get("username"), username);
         return findAll(sortable.and(filterable).and(usernameSpec), pageable);
     }
 

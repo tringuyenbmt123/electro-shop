@@ -6,9 +6,11 @@ import com.electro.constant.ResourceName;
 import com.electro.dto.ListResponse;
 import com.electro.dto.client.ClientPreorderRequest;
 import com.electro.dto.client.ClientPreorderResponse;
+import com.electro.entity.authentication.User;
 import com.electro.entity.client.Preorder;
 import com.electro.exception.ResourceNotFoundException;
 import com.electro.mapper.client.ClientPreorderMapper;
+import com.electro.repository.authentication.UserRepository;
 import com.electro.repository.client.PreorderRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/client-api/preorders")
@@ -39,6 +42,7 @@ public class ClientPreorderController {
 
     private PreorderRepository preorderRepository;
     private ClientPreorderMapper clientPreorderMapper;
+    private UserRepository userRepository;
 
     private static final String PREORDER_SORT = "updatedAt,desc";
 
@@ -57,8 +61,13 @@ public class ClientPreorderController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientPreorderResponse> createPreorder(@RequestBody ClientPreorderRequest request) throws Exception {
-        Optional<Preorder> preorderOpt = preorderRepository.findByUser_IdAndProduct_Id(request.getUserId(), request.getProductId());
+    public ResponseEntity<ClientPreorderResponse> createPreorder(@RequestBody ClientPreorderRequest request,
+                                                                  Authentication authentication) throws Exception {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.USER, FieldName.USERNAME, username));
+        
+        Optional<Preorder> preorderOpt = preorderRepository.findByUser_IdAndProduct_Id(user.getId(), request.getProductId());
 
         if (preorderOpt.isPresent()) {
             Preorder preorder = preorderOpt.get();
@@ -73,28 +82,44 @@ public class ClientPreorderController {
             }
         } else {
             Preorder entity = clientPreorderMapper.requestToEntity(request);
+            // Set authenticated user - prevent IDOR
+            entity.setUser(user);
             entity = preorderRepository.save(entity);
             return ResponseEntity.status(HttpStatus.CREATED).body(clientPreorderMapper.entityToResponse(entity));
         }
     }
 
     @PutMapping
-    public ResponseEntity<ClientPreorderResponse> updatePreorder(@RequestBody ClientPreorderRequest request) {
+    public ResponseEntity<ClientPreorderResponse> updatePreorder(@RequestBody ClientPreorderRequest request,
+                                                                  Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.USER, FieldName.USERNAME, username));
+        
         ClientPreorderResponse clientPreorderResponse = preorderRepository
-                .findByUser_IdAndProduct_Id(request.getUserId(), request.getProductId())
+                .findByUser_IdAndProduct_Id(user.getId(), request.getProductId())
                 .map(existingEntity -> clientPreorderMapper.partialUpdate(existingEntity, request))
                 .map(preorderRepository::save)
                 .map(clientPreorderMapper::entityToResponse)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ResourceName.PREORDER,
                         List.of(FieldName.USER_ID, FieldName.PRODUCT_ID).toString(),
-                        List.of(request.getUserId(), request.getProductId())));
+                        List.of(user.getId(), request.getProductId())));
         return ResponseEntity.status(HttpStatus.OK).body(clientPreorderResponse);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deletePreorders(@RequestBody List<Long> ids) {
-        preorderRepository.deleteAllById(ids);
+    public ResponseEntity<Void> deletePreorders(@RequestBody List<Long> ids, Authentication authentication) {
+        String username = authentication.getName();
+        // Only delete preorders belonging to the authenticated user - prevent IDOR
+        List<Long> validIds = ids.stream()
+                .map(preorderRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(preorder -> preorder.getUser().getUsername().equals(username))
+                .map(Preorder::getId)
+                .collect(Collectors.toList());
+        preorderRepository.deleteAllById(validIds);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

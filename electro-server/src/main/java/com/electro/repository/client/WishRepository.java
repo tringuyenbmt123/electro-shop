@@ -15,7 +15,9 @@ public interface WishRepository extends JpaRepository<Wish, Long>, JpaSpecificat
     default Page<Wish> findAllByUsername(String username, String sort, String filter, Pageable pageable) {
         Specification<Wish> sortable = RSQLJPASupport.toSort(sort);
         Specification<Wish> filterable = RSQLJPASupport.toSpecification(filter);
-        Specification<Wish> usernameSpec = RSQLJPASupport.toSpecification("user.username==" + username);
+        // Safe specification using Criteria API to prevent injection
+        Specification<Wish> usernameSpec = (root, query, cb) -> 
+            cb.equal(root.get("user").get("username"), username);
         return findAll(sortable.and(filterable).and(usernameSpec), pageable);
     }
 

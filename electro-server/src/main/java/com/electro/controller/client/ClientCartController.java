@@ -11,6 +11,7 @@ import com.electro.entity.cart.CartVariant;
 import com.electro.entity.cart.CartVariantKey;
 import com.electro.exception.ResourceNotFoundException;
 import com.electro.mapper.client.ClientCartMapper;
+import com.electro.repository.authentication.UserRepository;
 import com.electro.repository.cart.CartRepository;
 import com.electro.repository.cart.CartVariantRepository;
 import com.electro.repository.inventory.DocketVariantRepository;
@@ -42,6 +43,7 @@ public class ClientCartController {
     private CartVariantRepository cartVariantRepository;
     private ClientCartMapper clientCartMapper;
     private DocketVariantRepository docketVariantRepository;
+    private UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<ObjectNode> getCart(Authentication authentication) {
@@ -58,16 +60,22 @@ public class ClientCartController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientCartResponse> saveCart(@RequestBody ClientCartRequest request) {
+    public ResponseEntity<ClientCartResponse> saveCart(@RequestBody ClientCartRequest request, Authentication authentication) {
+        String username = authentication.getName();
         final Cart cartBeforeSave;
 
-        // TODO: Đôi khi cartId null nhưng thực tế user vẫn đang có cart trong DB
-        if (request.getCartId() == null) {
+        // Get cart by username, not by cartId from request (prevent IDOR)
+        Cart existingCart = cartRepository.findByUsername(username).orElse(null);
+
+        if (existingCart == null) {
+            // Create new cart for user
             cartBeforeSave = clientCartMapper.requestToEntity(request);
+            // Ensure the cart belongs to the authenticated user
+            cartBeforeSave.setUser(userRepository.findByUsername(username)
+                    .orElseThrow(() -> new ResourceNotFoundException(ResourceName.USER, FieldName.USERNAME, username)));
         } else {
-            cartBeforeSave = cartRepository.findById(request.getCartId())
-                    .map(existingEntity -> clientCartMapper.partialUpdate(existingEntity, request))
-                    .orElseThrow(() -> new ResourceNotFoundException(ResourceName.CART, FieldName.ID, request.getCartId()));
+            // Update existing cart - only if it belongs to the user
+            cartBeforeSave = clientCartMapper.partialUpdate(existingCart, request);
         }
 
         // Validate Variant Inventory
@@ -86,10 +94,20 @@ public class ClientCartController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteCartItems(@RequestBody List<ClientCartVariantKeyRequest> idRequests) {
+    public ResponseEntity<Void> deleteCartItems(@RequestBody List<ClientCartVariantKeyRequest> idRequests, 
+                                                 Authentication authentication) {
+        String username = authentication.getName();
+        
+        // Get user's cart to validate ownership
+        Cart userCart = cartRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.CART, FieldName.USERNAME, username));
+        
+        // Only delete items from user's own cart (prevent IDOR)
         List<CartVariantKey> ids = idRequests.stream()
+                .filter(idRequest -> idRequest.getCartId().equals(userCart.getId()))
                 .map(idRequest -> new CartVariantKey(idRequest.getCartId(), idRequest.getVariantId()))
                 .collect(Collectors.toList());
+        
         cartVariantRepository.deleteAllById(ids);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

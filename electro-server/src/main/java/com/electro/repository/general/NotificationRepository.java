@@ -13,7 +13,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     default Page<Notification> findAllByUsername(String username, String sort, String filter, Pageable pageable) {
         Specification<Notification> sortable = RSQLJPASupport.toSort(sort);
         Specification<Notification> filterable = RSQLJPASupport.toSpecification(filter);
-        Specification<Notification> usernameSpec = RSQLJPASupport.toSpecification("user.username==" + username);
+        // Safe specification using Criteria API to prevent injection
+        Specification<Notification> usernameSpec = (root, query, cb) -> 
+            cb.equal(root.get("user").get("username"), username);
         return findAll(sortable.and(filterable).and(usernameSpec), pageable);
     }
 
