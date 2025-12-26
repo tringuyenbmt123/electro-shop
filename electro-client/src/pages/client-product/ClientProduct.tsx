@@ -3,7 +3,6 @@ import { Container, Skeleton, Stack, useMantineTheme } from '@mantine/core';
 import { useQuery } from 'react-query';
 import FetchUtils, { ErrorMessage } from 'utils/FetchUtils';
 import ResourceURL from 'constants/ResourceURL';
-import NotifyUtils from 'utils/NotifyUtils';
 import { useParams } from 'react-router-dom';
 import { ClientProductResponse } from 'types';
 import useTitle from 'hooks/use-title';
@@ -16,34 +15,55 @@ import ClientProductRelatedProducts from 'pages/client-product/ClientProductRela
 
 function ClientProduct() {
   const theme = useMantineTheme();
+  const { slug } = useParams<{ slug: string }>();
 
-  const { slug } = useParams();
+  const encodedSlug = encodeURIComponent(slug || '');
 
-  const { productResponse, isLoadingProductResponse, isErrorProductResponse } = useGetProductApi(slug as string);
-  const product = productResponse as ClientProductResponse;
-  useTitle(product?.productName);
+  const {
+    productResponse,
+    isLoadingProductResponse,
+    isErrorProductResponse,
+  } = useGetProductApi(encodedSlug);
 
+  const product = productResponse as ClientProductResponse | undefined;
+
+  useTitle(product?.productName ?? 'Sản phẩm');
+
+  // ===== Loading =====
   if (isLoadingProductResponse) {
-    return <ClientProductSkeleton/>;
+    return <ClientProductSkeleton />;
   }
 
+  // ===== API error (400 / 404 / 500) =====
   if (isErrorProductResponse) {
-    return <ClientError/>;
+    return <ClientError />;
   }
 
+  // ===== Data không tồn tại =====
+  if (!product) {
+    return <ClientError />;
+  }
+
+  // ===== Success =====
   return (
     <main>
       <Container size="xl">
         <Stack spacing={theme.spacing.xl * 2}>
-          <ClientProductIntro product={product}/>
+          <ClientProductIntro product={product} />
 
-          {product.productSpecifications && <ClientProductSpecification product={product}/>}
+          {product.productSpecifications && (
+            <ClientProductSpecification product={product} />
+          )}
 
-          {product.productDescription && <ClientProductDescription product={product}/>}
+          {product.productDescription && (
+            <ClientProductDescription product={product} />
+          )}
 
-          <ClientProductReviews productSlug={slug as string}/>
+          <ClientProductReviews productSlug={encodedSlug} />
 
-          {product.productRelatedProducts.length > 0 && <ClientProductRelatedProducts product={product}/>}
+          {product.productRelatedProducts?.length > 0 && (
+            <ClientProductRelatedProducts product={product} />
+          )}
         </Stack>
       </Container>
     </main>
@@ -55,8 +75,8 @@ function ClientProductSkeleton() {
     <main>
       <Container size="xl">
         <Stack>
-          {Array(5).fill(0).map((_, index) => (
-            <Skeleton key={index} height={50} radius="md"/>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} height={50} radius="md" />
           ))}
         </Stack>
       </Container>
@@ -71,15 +91,19 @@ function useGetProductApi(productSlug: string) {
     isError: isErrorProductResponse,
   } = useQuery<ClientProductResponse, ErrorMessage>(
     ['client-api', 'products', 'getProduct', productSlug],
-    () => FetchUtils.get(ResourceURL.CLIENT_PRODUCT + '/' + productSlug),
+    () => FetchUtils.get(`${ResourceURL.CLIENT_PRODUCT}/${productSlug}`),
     {
-      onError: () => NotifyUtils.simpleFailed('Lấy dữ liệu không thành công'),
+      // ❗ KHÔNG notify cho 400/404
       refetchOnWindowFocus: false,
       keepPreviousData: true,
     }
   );
 
-  return { productResponse, isLoadingProductResponse, isErrorProductResponse };
+  return {
+    productResponse,
+    isLoadingProductResponse,
+    isErrorProductResponse,
+  };
 }
 
 export default ClientProduct;

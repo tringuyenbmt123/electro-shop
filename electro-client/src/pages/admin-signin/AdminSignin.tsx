@@ -13,6 +13,7 @@ import ResourceURL from 'constants/ResourceURL';
 import { UserResponse } from 'models/User';
 import NotifyUtils from 'utils/NotifyUtils';
 import { useNavigate } from 'react-router-dom';
+import RecaptchaWidget from 'components/RecaptchaWidget/RecaptchaWidget';
 
 const initialFormValues = {
   username: '',
@@ -40,6 +41,9 @@ function AdminSignin() {
     resetAdminAuthState,
   } = useAdminAuthStore();
 
+  const [recaptchaToken, setRecaptchaToken] = React.useState<string | null>(null);
+  const [recaptchaResetSignal, setRecaptchaResetSignal] = React.useState(0);
+
   const form = useForm({
     initialValues: initialFormValues,
     schema: zodResolver(formSchema),
@@ -55,9 +59,14 @@ function AdminSignin() {
 
   const handleFormSubmit = form.onSubmit(async (formValues) => {
     if (!user) {
+      if (!recaptchaToken) {
+        NotifyUtils.simpleFailed('Vui long xac minh reCAPTCHA');
+        return;
+      }
       const loginRequest: LoginRequest = {
         username: formValues.username,
         password: formValues.password,
+        recaptchaToken: recaptchaToken,
       };
 
       try {
@@ -67,12 +76,14 @@ function AdminSignin() {
         const userResponse = await userInfoApi.mutateAsync();
         updateUser(userResponse);
 
-        navigate('/admin');
+        navigate('/admin-nhom2-#d22cqat01-n');
 
         NotifyUtils.simpleSuccess('Đăng nhập thành công');
       } catch (e) {
         resetAdminAuthState();
         NotifyUtils.simpleFailed('Đăng nhập thất bại');
+      } finally {
+        setRecaptchaResetSignal((value) => value + 1);
       }
     }
   });
@@ -81,7 +92,7 @@ function AdminSignin() {
     <Box sx={{ backgroundColor: theme.colors.gray[1], height: '100vh' }}>
       <Container size={375} py={40}>
         <Stack align="center">
-          <ElectroLogo width={150}/>
+          <ElectroLogo width={150} />
 
           <Paper withBorder shadow="md" p={30} mt={30} radius="md" sx={{ width: '100%' }}>
             <form onSubmit={handleFormSubmit}>
@@ -100,7 +111,10 @@ function AdminSignin() {
                 disabled={!!user}
                 {...form.getInputProps('password')}
               />
-              <Button type="submit" fullWidth mt="xl" disabled={!!user}>
+              <Box mt="md">
+                <RecaptchaWidget onChange={setRecaptchaToken} resetSignal={recaptchaResetSignal} />
+              </Box>
+              <Button type="submit" fullWidth mt="xl" disabled={!!user || !recaptchaToken}>
                 Đăng nhập
               </Button>
             </form>

@@ -25,6 +25,7 @@ export interface UserRequest {
   avatar: string | null;
   status: number;
   roles: Role_UserRequest[];
+  recaptchaToken?: string;
 }
 
 interface Role_UserRequest {

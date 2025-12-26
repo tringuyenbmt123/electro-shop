@@ -4,6 +4,8 @@ class ApplicationConstants {
   static CLIENT_API_PATH = ApplicationConstants.HOME_PATH + '/client-api';
   static WEBSOCKET_PATH = ApplicationConstants.HOME_PATH + '/ws';
 
+  static RECAPTCHA_SITE_KEY = process.env.REACT_APP_RECAPTCHA_SITE_KEY || '6LfYMzcsAAAAAPC36UEZpT4KsmHEuVJyI4PLvW2G';
+
   static DEFAULT_TAX = 0.1;
   static DEFAULT_SHIPPING_COST = 0;
 

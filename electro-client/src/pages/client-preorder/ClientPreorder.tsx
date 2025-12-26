@@ -151,7 +151,6 @@ function ClientPreorderCard({ preorder }: { preorder: ClientPreorderResponse }) 
       onConfirm: () => {
         if (user) {
           const clientPreorderRequest: ClientPreorderRequest = {
-            userId: user.id,
             productId: preorder.preorderProduct.productId,
             status: 3,
           };

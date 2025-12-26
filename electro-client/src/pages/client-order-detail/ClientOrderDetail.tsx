@@ -510,7 +510,6 @@ function ReviewProductModal({ orderItem }: { orderItem: ClientOrderVariantRespon
   const handleFormSubmit = form.onSubmit((formValues) => {
     if (user) {
       const reviewRequest: ClientReviewRequest = {
-        userId: user.id,
         productId: orderItem.orderItemVariant.variantProduct.productId,
         ratingScore: formValues.rating,
         content: formValues.review,

@@ -51,7 +51,6 @@ function ClientProductCard({ product, search }: ClientProductCardProps) {
       NotifyUtils.simple('Vui lòng đăng nhập để sử dụng chức năng');
     } else {
       const clientWishRequest: ClientWishRequest = {
-        userId: user.id,
         productId: product.productId,
       };
       createWishApi.mutate(clientWishRequest);
@@ -64,7 +63,6 @@ function ClientProductCard({ product, search }: ClientProductCardProps) {
       NotifyUtils.simple('Vui lòng đăng nhập để sử dụng chức năng');
     } else {
       const clientPreorderRequest: ClientPreorderRequest = {
-        userId: user.id,
         productId: product.productId,
         status: 1,
       };
@@ -79,7 +77,6 @@ function ClientProductCard({ product, search }: ClientProductCardProps) {
     } else {
       const cartRequest: ClientCartRequest = {
         cartId: currentCartId,
-        userId: user.id,
         cartItems: [
           {
             variantId: product.productVariants[0].variantId,

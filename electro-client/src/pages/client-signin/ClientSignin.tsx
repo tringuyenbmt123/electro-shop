@@ -27,6 +27,7 @@ import useAuthStore from 'stores/use-auth-store';
 import { UserResponse } from 'models/User';
 import { AlertCircle } from 'tabler-icons-react';
 import { ClientCartResponse, Empty } from 'types';
+import RecaptchaWidget from 'components/RecaptchaWidget/RecaptchaWidget';
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -82,6 +83,8 @@ function ClientSignin() {
 
   const [counter, setCounter] = useState(3);
   const [openedAlert, setOpenedAlert] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [recaptchaResetSignal, setRecaptchaResetSignal] = useState(0);
 
   const navigate = useNavigate();
 
@@ -114,9 +117,15 @@ function ClientSignin() {
 
   const handleFormSubmit = form.onSubmit(async (formValues) => {
     if (!user) {
+      if (!recaptchaToken) {
+        NotifyUtils.simpleFailed('Vui long xac minh reCAPTCHA');
+        return;
+      }
+
       const loginRequest: LoginRequest = {
         username: formValues.username,
         password: formValues.password,
+        recaptchaToken: recaptchaToken,
       };
 
       try {
@@ -141,6 +150,8 @@ function ClientSignin() {
       } catch (e) {
         resetAuthState();
         NotifyUtils.simpleFailed('Đăng nhập thất bại');
+      } finally {
+        setRecaptchaResetSignal((value) => value + 1);
       }
     }
   });
@@ -152,7 +163,7 @@ function ClientSignin() {
           {(styles) => (
             <Alert
               style={styles}
-              icon={<AlertCircle size={16}/>}
+              icon={<AlertCircle size={16} />}
               title="Bạn đã đăng nhập thành công!"
               color="teal"
               radius="md"
@@ -188,6 +199,9 @@ function ClientSignin() {
                 disabled={!!user}
                 {...form.getInputProps('password')}
               />
+              <Box mt="md">
+                <RecaptchaWidget onChange={setRecaptchaToken} resetSignal={recaptchaResetSignal} />
+              </Box>
               <Box mt={5}>
                 <Anchor component={Link} to="/forgot" size="sm">Quên mật khẩu?</Anchor>
               </Box>
@@ -198,7 +212,7 @@ function ClientSignin() {
               {/*  size="md"*/}
               {/*  disabled={!!user}*/}
               {/*/>*/}
-              <Button type="submit" fullWidth mt="xl" size="md" disabled={!!user} radius="md">
+              <Button type="submit" fullWidth mt="xl" size="md" disabled={!!user || !recaptchaToken} radius="md">
                 Đăng nhập
               </Button>
             </form>

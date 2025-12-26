@@ -30,6 +30,7 @@ export interface ListResponse<O = unknown> {
  * ErrorMessage dùng để thể hiện đối tượng lỗi trả về sau lệnh fetch
  */
 export interface ErrorMessage {
+  status: number;
   statusCode: number;
   timestamp: string;
   message: string;

@@ -107,7 +107,6 @@ export interface ClientWishResponse {
 }
 
 export interface ClientWishRequest {
-  userId: number;
   productId: number;
 }
 
@@ -122,7 +121,6 @@ export interface ClientPreorderResponse {
 }
 
 export interface ClientPreorderRequest {
-  userId: number;
   productId: number;
   status: number;
 }
@@ -158,7 +156,6 @@ export interface ClientReviewResponse {
 }
 
 export interface ClientReviewRequest {
-  userId: number;
   productId: number;
   ratingScore: number;
   content: string;
@@ -195,7 +192,6 @@ interface ClientCartVariantResponse_ClientVariantResponse_ClientProductResponse 
 
 export interface ClientCartRequest {
   cartId: number | null;
-  userId: number;
   cartItems: ClientCartVariantRequest[];
   status: number;
   updateQuantityType: UpdateQuantityType;

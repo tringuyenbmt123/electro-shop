@@ -43,52 +43,74 @@ import NotifyUtils from 'utils/NotifyUtils';
 import { useQuery } from 'react-query';
 import FetchUtils, { ErrorMessage } from 'utils/FetchUtils';
 import ResourceURL from 'constants/ResourceURL';
-import { EventInitiationResponse, NotificationResponse } from 'models/Notification';
+import {
+  EventInitiationResponse,
+  NotificationResponse
+} from 'models/Notification';
 import MiscUtils from 'utils/MiscUtils';
 import useClientSiteStore from 'stores/use-client-site-store';
+
+/* =======================
+   🎨 Styles
+======================= */
 
 const useStyles = createStyles((theme) => ({
   header: {
     boxShadow: theme.shadows.sm,
-    borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
+    borderBottom: `1px solid ${
+      theme.colorScheme === 'dark'
+        ? theme.colors.dark[5]
+        : theme.colors.gray[2]
+    }`,
     marginBottom: theme.spacing.md * 2,
-    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white,
+    backgroundColor:
+      theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white,
   },
 
   iconGroup: {
-    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+    backgroundColor:
+      theme.colorScheme === 'dark'
+        ? theme.colors.dark[6]
+        : theme.colors.gray[0],
     borderRadius: theme.radius.md,
 
     '&:hover': {
-      backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2],
+      backgroundColor:
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[5]
+          : theme.colors.gray[2],
     },
 
     '&:active': {
       color: theme.white,
-      backgroundColor: theme.colorScheme === 'dark' ? theme.colors.blue[8] : theme.colors.blue[6],
+      backgroundColor:
+        theme.colorScheme === 'dark'
+          ? theme.colors.blue[8]
+          : theme.colors.blue[6],
     },
   },
 }));
+
+/* =======================
+   🧠 Component
+======================= */
 
 function ClientHeader() {
   const theme = useMantineTheme();
   const { classes } = useStyles();
 
   const [openedCategoryMenu, setOpenedCategoryMenu] = useState(false);
-
   const { ref: refHeaderStack, width: widthHeaderStack } = useElementSize();
 
   const { user, resetAuthState, currentTotalCartItems } = useAuthStore();
-
-  // Search state & function
-  const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-
-  useNotificationEvents();
-
   const { newNotifications } = useClientSiteStore();
 
-  const [disabledNotificationIndicator, setDisabledNotificationIndicator] = useState(true);
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const [disabledNotificationIndicator, setDisabledNotificationIndicator] =
+    useState(true);
+
+  useNotificationEvents();
 
   useEffect(() => {
     if (newNotifications.length > 0) {
@@ -96,9 +118,15 @@ function ClientHeader() {
     }
   }, [newNotifications.length]);
 
-  const handleSearchInput = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  /* =======================
+     🔐 SAFE SEARCH HANDLER
+     (No sanitize – encode only)
+  ======================= */
+  const handleSearchInput = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
     if (event.key === 'Enter' && search.trim() !== '') {
-      navigate('/search?q=' + search.trim());
+      navigate('/search?q=' + encodeURIComponent(search.trim()));
     }
   };
 
@@ -124,35 +152,50 @@ function ClientHeader() {
         <Stack spacing={0} ref={refHeaderStack}>
           <Group position="apart" py={theme.spacing.md}>
             <Center component={Link} to="/">
-              <ElectroLogo/>
+              <ElectroLogo />
             </Center>
+
             <TextInput
               placeholder="Bạn tìm gì..."
               variant="filled"
               size="md"
               radius="md"
-              icon={<Search size={16}/>}
+              icon={<Search size={16} />}
               sx={{ width: 600 }}
               value={search}
-              onChange={(event) => setSearch(event.currentTarget.value)}
+              onChange={(e) => setSearch(e.currentTarget.value)}
               onKeyDown={handleSearchInput}
+              maxLength={100}
             />
+
             <Group spacing="xs">
               {user && (
                 <>
                   <Tooltip label="Giỏ hàng" position="bottom">
                     <UnstyledButton component={Link} to="/cart">
-                      <Group spacing="xs" px={theme.spacing.sm} py={theme.spacing.xs} className={classes.iconGroup}>
-                        <ShoppingCart strokeWidth={1}/>
-                        <Text weight={500} size="sm">{currentTotalCartItems}</Text>
+                      <Group
+                        spacing="xs"
+                        px={theme.spacing.sm}
+                        py={theme.spacing.xs}
+                        className={classes.iconGroup}
+                      >
+                        <ShoppingCart strokeWidth={1} />
+                        <Text weight={500} size="sm">
+                          {currentTotalCartItems}
+                        </Text>
                       </Group>
                     </UnstyledButton>
                   </Tooltip>
 
                   <Tooltip label="Đơn hàng" position="bottom">
                     <UnstyledButton component={Link} to="/order">
-                      <Group spacing="xs" px={theme.spacing.sm} py={theme.spacing.xs} className={classes.iconGroup}>
-                        <FileBarcode strokeWidth={1}/>
+                      <Group
+                        spacing="xs"
+                        px={theme.spacing.sm}
+                        py={theme.spacing.xs}
+                        className={classes.iconGroup}
+                      >
+                        <FileBarcode strokeWidth={1} />
                       </Group>
                     </UnstyledButton>
                   </Tooltip>
@@ -161,9 +204,19 @@ function ClientHeader() {
 
               <Tooltip label="Thông báo" position="bottom">
                 <UnstyledButton onClick={handleNotificationButton}>
-                  <Indicator size={14} color="pink" withBorder disabled={disabledNotificationIndicator}>
-                    <Group spacing="xs" px={theme.spacing.sm} py={theme.spacing.xs} className={classes.iconGroup}>
-                      <Bell strokeWidth={1}/>
+                  <Indicator
+                    size={14}
+                    color="pink"
+                    withBorder
+                    disabled={disabledNotificationIndicator}
+                  >
+                    <Group
+                      spacing="xs"
+                      px={theme.spacing.sm}
+                      py={theme.spacing.xs}
+                      className={classes.iconGroup}
+                    >
+                      <Bell strokeWidth={1} />
                     </Group>
                   </Indicator>
                 </UnstyledButton>
@@ -171,7 +224,7 @@ function ClientHeader() {
 
               <Menu
                 placement="end"
-                control={(
+                control={
                   <Tooltip label="Tài khoản" position="bottom">
                     <UnstyledButton>
                       <Group
@@ -179,48 +232,53 @@ function ClientHeader() {
                         px={theme.spacing.sm}
                         py={theme.spacing.xs}
                         className={classes.iconGroup}
-                        sx={{ color: user ? theme.colors.blue[theme.colorScheme === 'dark' ? 4 : 7] : 'inherit' }}
+                        sx={{
+                          color: user
+                            ? theme.colors.blue[
+                              theme.colorScheme === 'dark' ? 4 : 7
+                            ]
+                            : 'inherit',
+                        }}
                       >
-                        <UserCircle strokeWidth={1}/>
+                        <UserCircle strokeWidth={1} />
                       </Group>
                     </UnstyledButton>
                   </Tooltip>
-                )}
+                }
               >
-                {user && (
+                {user ? (
                   <>
-                    <Menu.Item icon={<User size={14}/>} component={Link} to="/user">
+                    <Menu.Item icon={<User size={14} />} component={Link} to="/user">
                       Tài khoản
                     </Menu.Item>
-                    <Menu.Item icon={<Settings size={14}/>} component={Link} to="/user/setting">
+                    <Menu.Item icon={<Settings size={14} />} component={Link} to="/user/setting">
                       Thiết đặt
                     </Menu.Item>
-                    <Menu.Item icon={<Star size={14}/>} component={Link} to="/user/review">
+                    <Menu.Item icon={<Star size={14} />} component={Link} to="/user/review">
                       Đánh giá sản phẩm
                     </Menu.Item>
-                    <Menu.Item icon={<Heart size={14}/>} component={Link} to="/user/wishlist">
+                    <Menu.Item icon={<Heart size={14} />} component={Link} to="/user/wishlist">
                       Sản phẩm yêu thích
                     </Menu.Item>
-                    <Menu.Item icon={<Award size={14}/>} component={Link} to="/user/reward">
+                    <Menu.Item icon={<Award size={14} />} component={Link} to="/user/reward">
                       Điểm thưởng
                     </Menu.Item>
-                    <Menu.Item icon={<Alarm size={14}/>} component={Link} to="/user/preorder">
+                    <Menu.Item icon={<Alarm size={14} />} component={Link} to="/user/preorder">
                       Đặt trước sản phẩm
                     </Menu.Item>
-                    <Menu.Item icon={<MessageCircle size={14}/>} component={Link} to="/user/chat">
+                    <Menu.Item icon={<MessageCircle size={14} />} component={Link} to="/user/chat">
                       Yêu cầu tư vấn
                     </Menu.Item>
-                    <Menu.Item color="pink" icon={<Logout size={14}/>} onClick={handleSignoutMenu}>
+                    <Menu.Item color="pink" icon={<Logout size={14} />} onClick={handleSignoutMenu}>
                       Đăng xuất
                     </Menu.Item>
                   </>
-                )}
-                {!user && (
+                ) : (
                   <>
-                    <Menu.Item icon={<Login size={14}/>} component={Link} to="/signin">
+                    <Menu.Item icon={<Login size={14} />} component={Link} to="/signin">
                       Đăng nhập
                     </Menu.Item>
-                    <Menu.Item icon={<Fingerprint size={14}/>} component={Link} to="/signup">
+                    <Menu.Item icon={<Fingerprint size={14} />} component={Link} to="/signup">
                       Đăng ký
                     </Menu.Item>
                   </>
@@ -228,24 +286,30 @@ function ClientHeader() {
               </Menu>
             </Group>
           </Group>
+
           <Group position="apart" mb="md">
             <Group spacing={theme.spacing.xs / 2}>
               <Popover
                 opened={openedCategoryMenu}
                 onClose={() => setOpenedCategoryMenu(false)}
-                target={(
-                  <Button onClick={() => setOpenedCategoryMenu((o) => !o)} leftIcon={<List size={16}/>} radius="md">
+                target={
+                  <Button
+                    onClick={() => setOpenedCategoryMenu((o) => !o)}
+                    leftIcon={<List size={16} />}
+                    radius="md"
+                  >
                     Danh mục sản phẩm
                   </Button>
-                )}
+                }
                 width={widthHeaderStack}
                 position="bottom"
                 placement="start"
                 radius="md"
                 shadow="md"
               >
-                <CategoryMenu setOpenedCategoryMenu={setOpenedCategoryMenu}/>
+                <CategoryMenu setOpenedCategoryMenu={setOpenedCategoryMenu} />
               </Popover>
+
               <Button variant="subtle" radius="md">
                 Sản phẩm mới
               </Button>
@@ -256,9 +320,14 @@ function ClientHeader() {
                 Khuyến mại
               </Button>
             </Group>
+
             <Group spacing="xs">
-              <Badge color="pink" size="xs" variant="filled">Hot</Badge>
-              <Text size="sm" color="dimmed">Miễn phí giao hàng cho đơn hàng trên 1 triệu đồng</Text>
+              <Badge color="pink" size="xs" variant="filled">
+                Hot
+              </Badge>
+              <Text size="sm" color="dimmed">
+                Miễn phí giao hàng cho đơn hàng trên 1 triệu đồng
+              </Text>
             </Group>
           </Group>
         </Stack>
@@ -267,35 +336,45 @@ function ClientHeader() {
   );
 }
 
+/* =======================
+   🔔 Notification Events
+======================= */
+
 function useNotificationEvents() {
   const { user } = useAuthStore();
-
   const eventSourceRef = useRef<EventSource | null>(null);
-
   const { pushNewNotification } = useClientSiteStore();
 
   useQuery<EventInitiationResponse, ErrorMessage>(
-    ['client-api', 'notifications/init-events', 'initNotificationEvents'],
-    () => FetchUtils.getWithToken(ResourceURL.CLIENT_NOTIFICATION_INIT_EVENTS),
+    ['client-api', 'notifications/init-events'],
+    () =>
+      FetchUtils.getWithToken(
+        ResourceURL.CLIENT_NOTIFICATION_INIT_EVENTS
+      ),
     {
+      enabled: !!user,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
       onSuccess: (response) => {
-        const eventSource = new EventSource(`${ResourceURL.CLIENT_NOTIFICATION_EVENTS}?eventSourceUuid=${response.eventSourceUuid}`);
+        const eventSource = new EventSource(
+          `${ResourceURL.CLIENT_NOTIFICATION_EVENTS}?eventSourceUuid=${response.eventSourceUuid}`
+        );
 
-        eventSource.onopen = () => MiscUtils.console.log('Opening EventSource of Notifications...');
+        eventSource.onopen = () =>
+          MiscUtils.console.log('Opening Notification EventSource');
 
-        eventSource.onerror = () => MiscUtils.console.error('Encountered error with Notifications EventSource!');
+        eventSource.onerror = () =>
+          MiscUtils.console.error('Notification EventSource error');
 
         eventSource.onmessage = (event) => {
-          const notificationResponse = JSON.parse(event.data) as NotificationResponse;
-          pushNewNotification(notificationResponse);
+          const data = JSON.parse(event.data) as NotificationResponse;
+          pushNewNotification(data);
         };
 
         eventSourceRef.current = eventSource;
       },
-      onError: () => NotifyUtils.simpleFailed('Lấy dữ liệu không thành công'),
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-      enabled: !!user,
+      onError: () =>
+        NotifyUtils.simpleFailed('Lấy dữ liệu không thành công'),
     }
   );
 

@@ -334,7 +334,6 @@ function CartItemTableRow({ cartItem }: { cartItem: ClientCartVariantResponse })
       && cartItemQuantity <= cartItem.cartItemVariant.variantInventory) {
       const cartRequest: ClientCartRequest = {
         cartId: currentCartId,
-        userId: user.id,
         cartItems: [
           {
             variantId: cartItem.cartItemVariant.variantId,
