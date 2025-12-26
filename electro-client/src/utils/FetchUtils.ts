@@ -4,10 +4,12 @@ import { UploadedImageResponse } from 'models/Image';
 import { authStore } from 'stores/use-auth-store';
 import { adminAuthStore } from 'stores/use-admin-auth-store';
 
+type BasicRequestParams = Record<string, string | number | null | boolean | undefined>;
+
 /**
  * RequestParams dùng để chứa các query param
  */
-export interface RequestParams {
+export interface RequestParams extends BasicRequestParams {
   page?: number;
   size?: number;
   sort?: string;
@@ -38,9 +40,6 @@ export interface ErrorMessage {
   message: string;
   description: string;
 }
-
-type BasicRequestParams = Record<string, string | number | null | boolean>;
-
 
 class FetchUtils {
 

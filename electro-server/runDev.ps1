@@ -15,7 +15,7 @@ $env:SPRING_PROFILES_ACTIVE="dev"
 
 # ENV DEV
 $env:ELECTRO_DB_USERNAME="root"
-$env:ELECTRO_DB_PASSWORD="Thienvip10@"
+$env:ELECTRO_DB_PASSWORD="password@123"
 $env:ELECTRO_JWT_SECRET="SUpErSecretJWTTOKENKeYForEleCTro"
 $env:ELECTRO_GHN_TOKEN="cee52cd3-8a9d-11ed-9ccc-a2c11deda90c"
 $env:ELECTRO_MAIL_USERNAME="electroshopnlu2022@gmail.com"

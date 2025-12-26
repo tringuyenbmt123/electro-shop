@@ -10,7 +10,9 @@ function useGetAllApi<O>(
   resourceKey: string,
   requestParams?: RequestParams,
   successCallback?: (data: ListResponse<O>) => void,
-  options?: UseQueryOptions<ListResponse<O>, ErrorMessage>
+  options?: UseQueryOptions<ListResponse<O>, ErrorMessage>,
+  isAdmin = true,
+  useToken = true
 ) {
   const {
     activePage,
@@ -29,11 +31,13 @@ function useGetAllApi<O>(
     };
   }
 
-  const queryKey = [resourceKey, 'getAll', requestParams];
+  const queryKey = [resourceKey, 'getAll', requestParams, useToken, isAdmin];
 
   return useQuery<ListResponse<O>, ErrorMessage>(
     queryKey,
-    () => FetchUtils.getWithToken<ListResponse<O>>(resourceUrl, requestParams, true),
+    () => useToken
+      ? FetchUtils.getWithToken<ListResponse<O>>(resourceUrl, requestParams, isAdmin)
+      : FetchUtils.get<ListResponse<O>>(resourceUrl, requestParams),
     {
       keepPreviousData: true,
       onSuccess: successCallback,

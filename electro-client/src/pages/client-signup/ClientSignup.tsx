@@ -180,7 +180,9 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
       }));
       setProvinceSelectList(selectList);
     },
-    { refetchOnWindowFocus: false }
+    { refetchOnWindowFocus: false },
+    false,
+    false
   );
   useGetAllApi<DistrictResponse>(DistrictConfigs.resourceUrl, DistrictConfigs.resourceKey,
     { all: 1, filter: `province.id==${form.values['address.provinceId'] || 0}` },
@@ -191,7 +193,9 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
       }));
       setDistrictSelectList(selectList);
     },
-    { refetchOnWindowFocus: false }
+    { refetchOnWindowFocus: false },
+    false,
+    false
   );
   useGetAllApi<WardResponse>(WardConfigs.resourceUrl, WardConfigs.resourceKey,
     { all: 1, filter: `district.id==${form.values['address.districtId'] || 0}` },
@@ -202,7 +206,9 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
       }));
       setWardSelectList(selectList);
     },
-    { refetchOnWindowFocus: false }
+    { refetchOnWindowFocus: false },
+    false,
+    false
   );
 
   const registerUserApi = useMutation<RegistrationResponse, ErrorMessage, UserRequest>(
