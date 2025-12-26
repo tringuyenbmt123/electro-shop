@@ -1,6 +1,8 @@
 import ApplicationConstants from 'constants/ApplicationConstants';
 import { CollectionWrapper } from 'types';
 import { UploadedImageResponse } from 'models/Image';
+import { authStore } from 'stores/use-auth-store';
+import { adminAuthStore } from 'stores/use-admin-auth-store';
 
 /**
  * RequestParams dùng để chứa các query param
@@ -43,28 +45,35 @@ type BasicRequestParams = Record<string, string | number | null | boolean>;
 class FetchUtils {
 
   private static getJwtToken(isAdmin?: boolean): string {
-    const raw = localStorage.getItem(
-      isAdmin ? 'electro-admin-auth-store' : 'electro-auth-store'
-    );
+    const storageKey = isAdmin ? 'electro-admin-auth-store' : 'electro-auth-store';
+    const raw = localStorage.getItem(storageKey);
 
-    if (!raw) {
-      throw {
-        statusCode: 401,
-        message: 'JWT token not found (storage empty)',
-      };
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        const token = parsed?.state?.jwtToken;
+        if (token && typeof token === 'string') {
+          return token;
+        }
+      } catch {
+        // Fallback to in-memory token below.
+      }
     }
 
-    const parsed = JSON.parse(raw);
-    const token = parsed?.state?.jwtToken;
+    const storeToken = isAdmin
+      ? adminAuthStore.getState().jwtToken
+      : authStore.getState().jwtToken;
 
-    if (!token || typeof token !== 'string') {
-      throw {
-        statusCode: 401,
-        message: 'JWT token not found (invalid state)',
-      };
+    if (storeToken && typeof storeToken === 'string') {
+      return storeToken;
     }
 
-    return token;
+    throw {
+      statusCode: 401,
+      message: raw
+        ? 'JWT token not found (invalid state)'
+        : 'JWT token not found (storage empty)',
+    };
   }
 
   /**

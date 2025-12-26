@@ -228,7 +228,7 @@ type UpdateRewardStrategyRequest = { id: number, body: RewardStrategyRequest };
 
 function useUpdateRewardStrategyApi() {
   return useMutation<RewardStrategyResponse, ErrorMessage, UpdateRewardStrategyRequest>(
-    (request) => FetchUtils.update(RewardStrategyConfigs.resourceUrl, request.id, request.body)
+    (request) => FetchUtils.update(RewardStrategyConfigs.resourceUrl, request.id, request.body, true)
   );
 }
 

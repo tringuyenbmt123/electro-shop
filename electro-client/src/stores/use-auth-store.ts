@@ -32,7 +32,7 @@ const initialAuthState: AuthState = {
   currentSignupUserId: null,
 };
 
-const useAuthStore = create<AuthState & AuthAction>()(
+const authStore = create<AuthState & AuthAction>()(
   devtools(
     persist(
       (set, get) => ({
@@ -69,7 +69,7 @@ const useAuthStore = create<AuthState & AuthAction>()(
 );
 
 // Reference: https://docs.pmnd.rs/zustand/integrations/persisting-store-data#how-can-i-rehydrate-on-storage-event?
-const withStorageDOMEvents = (store: typeof useAuthStore) => {
+const withStorageDOMEvents = (store: typeof authStore) => {
   const storageEventCallback = (e: StorageEvent) => {
     if (e.key === store.persist.getOptions().name && e.newValue) {
       store.persist.rehydrate();
@@ -83,6 +83,8 @@ const withStorageDOMEvents = (store: typeof useAuthStore) => {
   };
 };
 
-withStorageDOMEvents(useAuthStore);
+withStorageDOMEvents(authStore);
 
-export default createTrackedSelector(useAuthStore);
+export { authStore };
+
+export default createTrackedSelector(authStore);

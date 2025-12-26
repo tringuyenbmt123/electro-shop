@@ -2,11 +2,11 @@ import { useMutation, useQueryClient } from 'react-query';
 import FetchUtils, { ErrorMessage } from 'utils/FetchUtils';
 import NotifyUtils from 'utils/NotifyUtils';
 
-function useDeleteByIdApi<T = number>(resourceUrl: string, resourceKey: string) {
+function useDeleteByIdApi<T = number>(resourceUrl: string, resourceKey: string, isAdmin = true) {
   const queryClient = useQueryClient();
 
   return useMutation<void, ErrorMessage, T>(
-    (entityId) => FetchUtils.deleteById(resourceUrl, entityId),
+    (entityId) => FetchUtils.deleteById(resourceUrl, entityId, isAdmin),
     {
       onSuccess: () => {
         NotifyUtils.simpleSuccess('Xóa thành công');

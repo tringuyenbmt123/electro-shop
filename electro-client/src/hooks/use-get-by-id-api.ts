@@ -8,11 +8,12 @@ function useGetByIdApi<O>(
   resourceKey: string,
   entityId: number,
   successCallback?: (data: O) => void,
-  options?: UseQueryOptions<O, ErrorMessage>
+  options?: UseQueryOptions<O, ErrorMessage>,
+  isAdmin = true
 ) {
   return useQuery<O, ErrorMessage>(
     [resourceKey, 'getById', entityId],
-    () => FetchUtils.getById<O>(resourceUrl, entityId),
+    () => FetchUtils.getById<O>(resourceUrl, entityId, isAdmin),
     {
       onSuccess: successCallback,
       onError: () => NotifyUtils.simpleFailed('Lấy dữ liệu không thành công'),

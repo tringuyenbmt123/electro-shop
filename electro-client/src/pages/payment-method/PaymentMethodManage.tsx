@@ -153,7 +153,7 @@ type UpdatePaymentMethodRequest = { id: number, body: PaymentMethodRequest };
 
 function useUpdatePaymentMethodApi() {
   return useMutation<PaymentMethodResponse, ErrorMessage, UpdatePaymentMethodRequest>(
-    (request) => FetchUtils.update(PaymentMethodConfigs.resourceUrl, request.id, request.body)
+    (request) => FetchUtils.update(PaymentMethodConfigs.resourceUrl, request.id, request.body, true)
   );
 }
 

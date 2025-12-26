@@ -20,7 +20,7 @@ const initialAuthState: AdminAuthState = {
   user: null,
 };
 
-const useAdminAuthStore = create<AdminAuthState & AdminAuthAction>()(
+const adminAuthStore = create<AdminAuthState & AdminAuthAction>()(
   devtools(
     persist(
       (set, get) => ({
@@ -46,7 +46,7 @@ const useAdminAuthStore = create<AdminAuthState & AdminAuthAction>()(
 );
 
 // Reference: https://docs.pmnd.rs/zustand/integrations/persisting-store-data#how-can-i-rehydrate-on-storage-event?
-const withStorageDOMEvents = (store: typeof useAdminAuthStore) => {
+const withStorageDOMEvents = (store: typeof adminAuthStore) => {
   const storageEventCallback = (e: StorageEvent) => {
     if (e.key === store.persist.getOptions().name && e.newValue) {
       store.persist.rehydrate();
@@ -60,6 +60,8 @@ const withStorageDOMEvents = (store: typeof useAdminAuthStore) => {
   };
 };
 
-withStorageDOMEvents(useAdminAuthStore);
+withStorageDOMEvents(adminAuthStore);
 
-export default createTrackedSelector(useAdminAuthStore);
+export { adminAuthStore };
+
+export default createTrackedSelector(adminAuthStore);
