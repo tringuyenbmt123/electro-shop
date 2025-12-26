@@ -17,4 +17,5 @@ public class UserRequest {
     private String avatar;
     private Integer status;
     private Set<Role_UserRequest> roles;
+    private String recaptchaToken;
 }

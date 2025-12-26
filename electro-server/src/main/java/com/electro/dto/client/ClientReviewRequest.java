@@ -3,12 +3,22 @@ package com.electro.dto.client;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.*;
+
 @Data
 @Accessors(chain = true)
 public class ClientReviewRequest {
-    private Long userId;
+
+    @NotNull
+    @Positive
     private Long productId;
-    private Integer ratingScore;
+
+    @NotBlank
+    @Size(max = 1000)
     private String content;
-    private Integer status;
+
+    @NotNull
+    @Min(1)
+    @Max(5)
+    private Integer ratingScore;
 }

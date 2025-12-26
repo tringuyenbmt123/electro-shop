@@ -11,24 +11,17 @@ import com.electro.entity.review.Review;
 import com.electro.exception.ResourceNotFoundException;
 import com.electro.mapper.client.ClientReviewMapper;
 import com.electro.repository.review.ReviewRepository;
+import com.electro.config.security.UserDetailsImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityManager;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -37,57 +30,135 @@ import java.util.List;
 @CrossOrigin(AppConstants.FRONTEND_HOST)
 public class ClientReviewController {
 
-    private ReviewRepository reviewRepository;
-    private ClientReviewMapper clientReviewMapper;
+    private static final int MAX_PAGE_SIZE = 50;
+    private static final int APPROVED_STATUS = 2;
+
+    private final ReviewRepository reviewRepository;
+    private final ClientReviewMapper clientReviewMapper;
+    private final EntityManager entityManager;
+
+    /* ================= GET PUBLIC – CHỈ ĐÃ DUYỆT ================= */
 
     @GetMapping("/products/{productSlug}")
     public ResponseEntity<ListResponse<ClientSimpleReviewResponse>> getAllReviewsByProduct(
             @PathVariable String productSlug,
-            @RequestParam(name = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(name = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
-            @RequestParam(name = "sort", defaultValue = AppConstants.DEFAULT_SORT) String sort,
-            @RequestParam(name = "filter", required = false) @Nullable String filter
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size
     ) {
-        Page<Review> reviews = reviewRepository.findAllByProductSlug(productSlug, sort, filter, PageRequest.of(page - 1, size));
-        List<ClientSimpleReviewResponse> clientReviewResponses = reviews.map(clientReviewMapper::entityToSimpleResponse).toList();
-        return ResponseEntity.status(HttpStatus.OK).body(ListResponse.of(clientReviewResponses, reviews));
+        if (page < 1 || size < 1 || size > MAX_PAGE_SIZE) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Page<Review> reviews =
+                reviewRepository.findAllByProduct_SlugAndStatus(
+                        productSlug,
+                        APPROVED_STATUS,
+                        PageRequest.of(page - 1, size)
+                );
+
+        return ResponseEntity.ok(
+                ListResponse.of(
+                        reviews.map(clientReviewMapper::entityToSimpleResponse).toList(),
+                        reviews
+                )
+        );
     }
+
+    /* ================= GET BY USER ================= */
 
     @GetMapping
     public ResponseEntity<ListResponse<ClientReviewResponse>> getAllReviewsByUser(
             Authentication authentication,
-            @RequestParam(name = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(name = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
-            @RequestParam(name = "sort", defaultValue = AppConstants.DEFAULT_SORT) String sort,
-            @RequestParam(name = "filter", required = false) @Nullable String filter
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size
     ) {
-        String username = authentication.getName();
-        Page<Review> reviews = reviewRepository.findAllByUsername(username, sort, filter, PageRequest.of(page - 1, size));
-        List<ClientReviewResponse> clientReviewResponses = reviews.map(clientReviewMapper::entityToResponse).toList();
-        return ResponseEntity.status(HttpStatus.OK).body(ListResponse.of(clientReviewResponses, reviews));
+        if (page < 1 || size < 1 || size > MAX_PAGE_SIZE) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Page<Review> reviews =
+                reviewRepository.findAllByUser_Username(
+                        authentication.getName(),
+                        PageRequest.of(page - 1, size)
+                );
+
+        return ResponseEntity.ok(
+                ListResponse.of(
+                        reviews.map(clientReviewMapper::entityToResponse).toList(),
+                        reviews
+                )
+        );
     }
+
+    /* ================= CREATE ================= */
 
     @PostMapping
-    public ResponseEntity<ClientReviewResponse> createReview(@RequestBody ClientReviewRequest request) {
-        Review entity = reviewRepository.save(clientReviewMapper.requestToEntity(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(clientReviewMapper.entityToResponse(entity));
+    public ResponseEntity<ClientReviewResponse> createReview(
+            Authentication authentication,
+            @Valid @RequestBody ClientReviewRequest request
+    ) {
+        UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
+
+        Review entity = clientReviewMapper.requestToEntity(request);
+
+        entity.setUser(
+                entityManager.getReference(
+                        com.electro.entity.authentication.User.class,
+                        user.getId()
+                )
+        );
+
+        Review saved = reviewRepository.save(entity);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(clientReviewMapper.entityToResponse(saved));
     }
+
+    /* ================= UPDATE – OWNER ONLY ================= */
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClientReviewResponse> updateReview(@PathVariable Long id,
-                                                             @RequestBody ClientReviewRequest request) {
-        ClientReviewResponse clientReviewResponse = reviewRepository.findById(id)
-                .map(existingEntity -> clientReviewMapper.partialUpdate(existingEntity, request))
-                .map(reviewRepository::save)
-                .map(clientReviewMapper::entityToResponse)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceName.REVIEW, FieldName.ID, id));
-        return ResponseEntity.status(HttpStatus.OK).body(clientReviewResponse);
+    public ResponseEntity<ClientReviewResponse> updateReview(
+            @PathVariable Long id,
+            Authentication authentication,
+            @Valid @RequestBody ClientReviewRequest request
+    ) {
+        UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
+
+        Review review =
+                reviewRepository.findByIdAndUser_Id(id, user.getId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        ResourceName.REVIEW,
+                                        FieldName.ID,
+                                        id
+                                )
+                        );
+
+        Review updated =
+                reviewRepository.save(
+                        clientReviewMapper.partialUpdate(review, request)
+                );
+
+        return ResponseEntity.ok(
+                clientReviewMapper.entityToResponse(updated)
+        );
     }
+
+    /* ================= DELETE – OWNER ONLY ================= */
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteReviews(@RequestBody List<Long> ids) {
-        reviewRepository.deleteAllById(ids);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
+    public ResponseEntity<Void> deleteReviews(
+            Authentication authentication,
+            @RequestBody List<Long> ids
+    ) {
+        UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
 
+        ids.forEach(id ->
+                reviewRepository.findByIdAndUser_Id(id, user.getId())
+                        .ifPresent(reviewRepository::delete)
+        );
+
+        return ResponseEntity.noContent().build();
+    }
 }

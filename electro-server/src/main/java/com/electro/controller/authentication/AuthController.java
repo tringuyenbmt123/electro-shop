@@ -15,6 +15,7 @@ import com.electro.entity.authentication.User;
 import com.electro.exception.RefreshTokenException;
 import com.electro.mapper.authentication.UserMapper;
 import com.electro.repository.authentication.UserRepository;
+import com.electro.service.auth.RecaptchaService;
 import com.electro.service.auth.VerificationService;
 import com.electro.service.authetication.RefreshTokenService;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -46,6 +48,7 @@ public class AuthController {
 
     private AuthenticationManager authenticationManager;
     private VerificationService verificationService;
+    private RecaptchaService recaptchaService;
     private RefreshTokenService refreshTokenService;
     private JwtUtils jwtUtils;
     private UserRepository userRepository;
@@ -53,6 +56,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        recaptchaService.verifyToken(loginRequest.getRecaptchaToken());
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -78,6 +82,7 @@ public class AuthController {
 
     @PostMapping("/registration")
     public ResponseEntity<RegistrationResponse> registerUser(@RequestBody UserRequest userRequest) {
+        recaptchaService.verifyToken(userRequest.getRecaptchaToken());
         Long userId = verificationService.generateTokenVerify(userRequest);
         return ResponseEntity.status(HttpStatus.OK).body(new RegistrationResponse(userId));
     }
@@ -100,13 +105,16 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(new ObjectNode(JsonNodeFactory.instance));
     }
 
-    @GetMapping("/forgot-password")
-    public ResponseEntity<ObjectNode> forgotPassword(@RequestParam String email) {
+    // Changed from GET to POST to prevent email exposure in URL/logs
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ObjectNode> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
         verificationService.forgetPassword(email);
+        // Always return success to prevent email enumeration
         return ResponseEntity.status(HttpStatus.OK).body(new ObjectNode(JsonNodeFactory.instance));
     }
 
-    @PutMapping("/reset-password")
+    @PostMapping("/reset-password")
     public ResponseEntity<ObjectNode> resetPassword(@RequestBody ResetPasswordRequest resetPassword) {
         verificationService.resetPassword(resetPassword);
         return ResponseEntity.status(HttpStatus.OK).body(new ObjectNode(JsonNodeFactory.instance));

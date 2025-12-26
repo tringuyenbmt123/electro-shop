@@ -6373,12 +6373,12 @@
 	"variable": [
 		{
 			"key": "electro",
-			"value": "http://localhost:8085/api",
+			"value": "http://localhost:8443/api",
 			"type": "default"
 		},
 		{
 			"key": "electro-home",
-			"value": "http://localhost:8085",
+			"value": "http://localhost:8443",
 			"type": "default"
 		},
 		{

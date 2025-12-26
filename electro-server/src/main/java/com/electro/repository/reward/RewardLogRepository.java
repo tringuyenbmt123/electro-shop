@@ -8,11 +8,17 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface RewardLogRepository extends JpaRepository<RewardLog, Long>, JpaSpecificationExecutor<RewardLog> {
+public interface RewardLogRepository
+        extends JpaRepository<RewardLog, Long>,
+                JpaSpecificationExecutor<RewardLog> {
 
-    @Query("SELECT SUM(r.score) FROM RewardLog r JOIN r.user u WHERE u.username = :username")
+    @Query(
+        "SELECT COALESCE(SUM(r.score), 0) " +
+        "FROM RewardLog r " +
+        "JOIN r.user u " +
+        "WHERE u.username = :username"
+    )
     int sumScoreByUsername(@Param("username") String username);
 
     List<RewardLog> findByUserUsername(String username);
-
 }
