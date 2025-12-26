@@ -69,7 +69,7 @@ function Shortcut() {
       <Card shadow="sm" p="sm">
         <Group>
           <Anchor component={Link} to="/">Client</Anchor>
-          <Anchor component={Link} to="/admin-nhom2-#d22cqat01-n">Admin</Anchor>
+          <Anchor component={Link} to="/admin">Admin</Anchor>
           <Button color="teal" variant="light" compact onClick={resetAuthState}>
             ResetAuthState
           </Button>

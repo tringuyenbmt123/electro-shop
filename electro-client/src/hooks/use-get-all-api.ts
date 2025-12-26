@@ -33,14 +33,16 @@ function useGetAllApi<O>(
 
   return useQuery<ListResponse<O>, ErrorMessage>(
     queryKey,
-    () => FetchUtils.getAll<O>(resourceUrl, requestParams),
+    () => FetchUtils.getWithToken<ListResponse<O>>(resourceUrl, requestParams, true),
     {
       keepPreviousData: true,
       onSuccess: successCallback,
-      onError: (error) => NotifyUtils.simpleFailed(`Lỗi ${error.statusCode || 'chưa biết'}: Lấy dữ liệu không thành công`),
+      onError: (error) =>
+        NotifyUtils.simpleFailed(`Lỗi ${error.statusCode || 'chưa biết'}: Lấy dữ liệu không thành công`),
       ...options,
     }
   );
+  
 }
 
 export default useGetAllApi;

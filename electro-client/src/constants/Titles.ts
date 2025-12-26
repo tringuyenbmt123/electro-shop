@@ -23,7 +23,7 @@ const titles: Record<string, string> = {
   '/signup': 'Đăng ký',
   '/forgot': 'Yêu cầu cấp lại mật khẩu',
 
-  '/admin-nhom2-#d22cqat01-n': 'Admin',
+  '/admin': 'Admin',
 };
 
 const handler = {

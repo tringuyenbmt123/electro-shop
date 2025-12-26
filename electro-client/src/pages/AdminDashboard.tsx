@@ -39,19 +39,19 @@ function AdminDashboard() {
           <Text size="lg" weight={500} color="dimmed">Tổng quan</Text>
           <Grid>
             <Grid.Col span={3}>
-              <OverviewCard title="Tổng số khách hàng" number={statistic.totalCustomer} color="blue" icon={Users}/>
+              <OverviewCard title="Tổng số khách hàng" number={statistic.totalCustomer} color="blue" icon={Users} />
             </Grid.Col>
             <Grid.Col span={3}>
-              <OverviewCard title="Tổng số sản phẩm" number={statistic.totalProduct} color="orange" icon={Box}/>
+              <OverviewCard title="Tổng số sản phẩm" number={statistic.totalProduct} color="orange" icon={Box} />
             </Grid.Col>
             <Grid.Col span={3}>
-              <OverviewCard title="Tổng số đơn hàng" number={statistic.totalOrder} color="teal" icon={FileBarcode}/>
+              <OverviewCard title="Tổng số đơn hàng" number={statistic.totalOrder} color="teal" icon={FileBarcode} />
             </Grid.Col>
             <Grid.Col span={3}>
-              <OverviewCard title="Tổng số vận đơn" number={statistic.totalWaybill} color="grape" icon={Truck}/>
+              <OverviewCard title="Tổng số vận đơn" number={statistic.totalWaybill} color="grape" icon={Truck} />
             </Grid.Col>
             <Grid.Col span={3}>
-              <OverviewCard title="Tổng số đánh giá" number={statistic.totalReview} color="yellow" icon={Star}/>
+              <OverviewCard title="Tổng số đánh giá" number={statistic.totalReview} color="yellow" icon={Star} />
             </Grid.Col>
             <Grid.Col span={3}>
               <OverviewCard
@@ -70,7 +70,7 @@ function AdminDashboard() {
               />
             </Grid.Col>
             <Grid.Col span={3}>
-              <OverviewCard title="Tổng số thương hiệu" number={statistic.totalBrand} color="indigo" icon={BrandApple}/>
+              <OverviewCard title="Tổng số thương hiệu" number={statistic.totalBrand} color="indigo" icon={BrandApple} />
             </Grid.Col>
           </Grid>
         </Stack>
@@ -92,9 +92,9 @@ function AdminDashboard() {
                   data={dateReducerForStatisticResources(statistic.statisticRegistration)}
                   margin={{ top: 10, right: 5, bottom: 0, left: -10 }}
                 >
-                  <XAxis dataKey="date"/>
-                  <YAxis/>
-                  <Tooltip/>
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
                   <Line
                     name="Số lượt đăng ký"
                     type="monotone"
@@ -118,9 +118,9 @@ function AdminDashboard() {
                   data={dateReducerForStatisticResources(statistic.statisticReview)}
                   margin={{ top: 10, right: 5, bottom: 0, left: -10 }}
                 >
-                  <XAxis dataKey="date"/>
-                  <YAxis/>
-                  <Tooltip/>
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
                   <Line
                     name="Số lượt đánh giá"
                     type="monotone"
@@ -147,9 +147,9 @@ function AdminDashboard() {
                   data={dateReducerForStatisticResources(statistic.statisticOrder)}
                   margin={{ top: 10, right: 5, bottom: 0, left: -10 }}
                 >
-                  <XAxis dataKey="date"/>
-                  <YAxis/>
-                  <Tooltip/>
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
                   <Bar
                     name="Số lượt đặt hàng"
                     dataKey="total"
@@ -172,9 +172,9 @@ function AdminDashboard() {
                   data={dateReducerForStatisticResources(statistic.statisticWaybill)}
                   margin={{ top: 10, right: 5, bottom: 0, left: -10 }}
                 >
-                  <XAxis dataKey="date"/>
-                  <YAxis/>
-                  <Tooltip/>
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
                   <Bar
                     name="Số lượt tạo vận đơn"
                     dataKey="total"
@@ -208,7 +208,7 @@ function OverviewCard({ title, number, color, icon }: OverviewCardProps) {
       color: theme.colorScheme === 'dark' ? theme.white : theme.black,
     }}>
       <Group>
-        <Icon size={40} strokeWidth={1.25}/>
+        <Icon size={40} strokeWidth={1.25} />
         <Stack spacing={2.5}>
           <Text>{title}</Text>
           <Text size="xl" weight={500}>{number}</Text>
@@ -240,7 +240,7 @@ function useGetStatisticApi() {
     isError: isErrorStatisticResponse,
   } = useQuery<StatisticResponse, ErrorMessage>(
     ['api', 'stats', 'getStatistic'],
-    () => FetchUtils.get(ResourceURL.STATISTIC),
+    () => FetchUtils.getWithToken(ResourceURL.STATISTIC, undefined, true),
     {
       onError: () => NotifyUtils.simpleFailed('Lấy dữ liệu không thành công'),
       keepPreviousData: true,

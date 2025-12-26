@@ -46,7 +46,7 @@ const genderSelectList: SelectOption[] = [
   },
   {
     value: 'F',
-    label: 'N�+�',
+    label: 'Nữ',
   },
 ];
 
@@ -59,7 +59,7 @@ function ClientSignup() {
 
   const userId = searchParams.get('userId') || currentSignupUserId;
 
-  const currentStep = userId ? 1 : 0; // Nߦ+u c+� userId th+� nhߦ�y sang b���+�c 2
+  const currentStep = userId ? 1 : 0; // Nếu có userId thì nhảy sang bước 2
 
   const [active, setActive] = useState(currentStep);
 
@@ -77,7 +77,7 @@ function ClientSignup() {
     <main>
       <Container size="xl">
         <Stack align="center" spacing={50}>
-          <Title order={2}>-�-�ng k++ t+�i khoߦ�n</Title>
+          <Title order={2}>Đăng ký tài khoản</Title>
 
           <Stepper
             active={active}
@@ -87,24 +87,24 @@ function ClientSignup() {
           >
             <Stepper.Step
               icon={<UserCheck size={18} />}
-              label="B���+�c 1"
-              description="Tߦ�o t+�i khoߦ�n"
+              label="Bước 1"
+              description="Tạo tài khoản"
               allowStepSelect={false}
             >
               <ClientSignupStepOne nextStep={nextStep} />
             </Stepper.Step>
             <Stepper.Step
               icon={<MailOpened size={18} />}
-              label="B���+�c 2"
-              description="X+�c nhߦ�n email"
+              label="Bước 2"
+              description="Xác nhận email"
               allowStepSelect={false}
             >
               <ClientSignupStepTwo nextStep={nextStep} userId={Number(userId) || null} />
             </Stepper.Step>
             <Stepper.Step
               icon={<ShieldCheck size={18} />}
-              label="B���+�c 3"
-              description="-�-�ng k++ th+�nh c+�ng"
+              label="Bước 3"
+              description="Đăng ký thành công"
               allowStepSelect={false}
             />
             <Stepper.Completed>
@@ -134,26 +134,27 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
     'address.provinceId': null as string | null,
     'address.districtId': null as string | null,
     'address.wardId': null as string | null,
-    avatar: null, // Kh+�ng d+�ng
-    status: '2', // Kh+�ng d+�ng
-    roles: [] as string[], // Kh+�ng d+�ng
+    avatar: null, // Không dùng
+    status: '2', // Không dùng
+    roles: [] as string[], // Không dùng
   };
 
   const formSchema = z.object({
-    username: z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' })
-      .min(2, MessageUtils.min('T+�n t+�i khoߦ�n', 2)),
-    password: z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' })
-      .min(1, MessageUtils.min('Mߦ�t khߦ�u', 1)),
-    fullname: z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' }),
-    email: z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' })
-      .email({ message: 'Nhߦ�p email -�+�ng -��+�nh dߦ�ng' }),
-    phone: z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' })
-      .regex(/(((\+|)84)|0)(3|5|7|8|9)+([0-9]{8})\b/, { message: 'Nhߦ�p s�+� -�i�+�n thoߦ�i -�+�ng -��+�nh dߦ�ng' }),
-    gender: z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' }),
-    'address.line': z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' }),
-    'address.provinceId': z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' }),
-    'address.districtId': z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' }),
-    'address.wardId': z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' }),
+    username: z.string({ invalid_type_error: 'Vui lòng không bỏ trống' })
+      .min(2, MessageUtils.min('Tên tài khoản', 2)),
+    password: z.string({ invalid_type_error: 'Vui lòng không bỏ trống' })
+      .min(12, MessageUtils.min('Mật khẩu', 12))
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}$/, { message: 'Mật khẩu có độ dài tối thiểu 12 kí tự, bao gồm chữ in hoa, thường, kí số và kí tự đặc biệt' }),
+    fullname: z.string({ invalid_type_error: 'Vui lòng không bỏ trống' }),
+    email: z.string({ invalid_type_error: 'Vui lòng không bỏ trống' })
+      .email({ message: 'Nhập email đúng định dạng' }),
+    phone: z.string({ invalid_type_error: 'Vui lòng không bỏ trống' })
+      .regex(/(((\+|)84)|0)(3|5|7|8|9)+([0-9]{8})\b/, { message: 'Nhập số điện thoại đúng định dạng' }),
+    gender: z.string({ invalid_type_error: 'Vui lòng không bỏ trống' }),
+    'address.line': z.string({ invalid_type_error: 'Vui lòng không bỏ trống' }),
+    'address.provinceId': z.string({ invalid_type_error: 'Vui lòng không bỏ trống' }),
+    'address.districtId': z.string({ invalid_type_error: 'Vui lòng không bỏ trống' }),
+    'address.wardId': z.string({ invalid_type_error: 'Vui lòng không bỏ trống' }),
     avatar: z.string().nullable(),
     status: z.string(),
     roles: z.array(z.string()),
@@ -208,14 +209,14 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
     (requestBody) => FetchUtils.post(ResourceURL.CLIENT_REGISTRATION, requestBody),
     {
       onSuccess: (registrationResponse) => {
-        NotifyUtils.simpleSuccess('Tߦ�o t+�i khoߦ�n th+�nh c+�ng');
+        NotifyUtils.simpleSuccess('Tạo tài khoản thành công');
         updateCurrentSignupUserId(registrationResponse.userId);
         nextStep();
         setRecaptchaResetSignal((value) => value + 1);
         setRecaptchaToken(null);
       },
       onError: () => {
-        NotifyUtils.simpleFailed('Tߦ�o t+�i khoߦ�n kh+�ng th+�nh c+�ng');
+        NotifyUtils.simpleFailed('Tạo tài khoản không thành công');
         setRecaptchaResetSignal((value) => value + 1);
         setRecaptchaToken(null);
       },
@@ -224,7 +225,7 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
 
   const handleFormSubmit = form.onSubmit((formValues) => {
     if (!recaptchaToken) {
-      NotifyUtils.simpleFailed('Vui long xac minh reCAPTCHA');
+      NotifyUtils.simpleFailed('Vui lòng xác minh reCAPTCHA');
       return;
     }
     const requestBody: UserRequest = {
@@ -256,59 +257,59 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
           <TextInput
             required
             radius="md"
-            label="T+�n t+�i khoߦ�n"
-            placeholder="Nhߦ�p t+�n t+�i khoߦ�n mong mu�+�n"
+            label="Tên tài khoản"
+            placeholder="Nhập tên tài khoản mong muốn"
             {...form.getInputProps('username')}
           />
           <PasswordInput
             required
             radius="md"
-            label="Mߦ�t khߦ�u"
-            placeholder="Nhߦ�p mߦ�t khߦ�u mong mu�+�n"
+            label="Mật khẩu"
+            placeholder="Nhập mật khẩu mong muốn"
             {...form.getInputProps('password')}
           />
           <TextInput
             required
             radius="md"
-            label="H�+� v+� t+�n"
-            placeholder="Nhߦ�p h�+� v+� t+�n c�+�a bߦ�n"
+            label="Họ và tên"
+            placeholder="Nhập họ và tên của bạn"
             {...form.getInputProps('fullname')}
           />
           <TextInput
             required
             radius="md"
             label="Email"
-            placeholder="Nhߦ�p email c�+�a bߦ�n"
+            placeholder="Nhập email của bạn"
             {...form.getInputProps('email')}
           />
           <TextInput
             required
             radius="md"
-            label="S�+� -�i�+�n thoߦ�i"
-            placeholder="Nhߦ�p s�+� -�i�+�n thoߦ�i c�+�a bߦ�n"
+            label="Số điện thoại"
+            placeholder="Nhập số điện thoại của bạn"
             {...form.getInputProps('phone')}
           />
           <Select
             required
             radius="md"
-            label="Gi�+�i t+�nh"
-            placeholder="Ch�+�n gi�+�i t+�nh"
+            label="Giới tính"
+            placeholder="Chọn giới tính"
             data={genderSelectList}
             {...form.getInputProps('gender')}
           />
           <Select
             required
             radius="md"
-            label="T�+�nh th+�nh"
-            placeholder="Ch�+�n t�+�nh th+�nh"
+            label="Tỉnh thành"
+            placeholder="Chọn tỉnh thành"
             data={provinceSelectList}
             {...form.getInputProps('address.provinceId')}
           />
           <Select
             required
             radius="md"
-            label="Quߦ�n huy�+�n"
-            placeholder="Ch�+�n quߦ�n huy�+�n"
+            label="Quận huyện"
+            placeholder="Chọn quận huyện"
             data={districtSelectList}
             disabled={form.values['address.provinceId'] === null}
             {...form.getInputProps('address.districtId')}
@@ -316,8 +317,8 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
           <Select
             required
             radius="md"
-            label="Ph���+�ng x+�"
-            placeholder="Ch�+�n ph���+�ng x+�"
+            label="Phường xã"
+            placeholder="Chọn phường xã"
             data={wardSelectList}
             disabled={form.values['address.districtId'] === null}
             {...form.getInputProps('address.wardId')}
@@ -325,8 +326,8 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
           <TextInput
             required
             radius="md"
-            label="-��+�a ch�+�"
-            placeholder="Nhߦ�p -��+�a ch�+� c�+�a bߦ�n"
+            label="Địa chỉ"
+            placeholder="Nhập địa chỉ của bạn"
             {...form.getInputProps('address.line')}
           />
           <RecaptchaWidget onChange={setRecaptchaToken} resetSignal={recaptchaResetSignal} />
@@ -335,7 +336,7 @@ function ClientSignupStepOne({ nextStep }: { nextStep: () => void }) {
             type="submit"
             disabled={MiscUtils.isEquals(initialFormValues, form.values) || registerUserApi.isLoading || !recaptchaToken}
           >
-            -�-�ng k++
+            Đăng ký
           </Button>
         </Stack>
       </form>
@@ -354,7 +355,7 @@ function ClientSignupStepTwo({ nextStep, userId }: { nextStep: () => void, userI
   };
 
   const formSchema = z.object({
-    token: z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' }),
+    token: z.string({ invalid_type_error: 'Vui lòng không bỏ trống' }),
   });
 
   const form = useForm({
@@ -366,11 +367,11 @@ function ClientSignupStepTwo({ nextStep, userId }: { nextStep: () => void, userI
     (requestBody) => FetchUtils.post(ResourceURL.CLIENT_REGISTRATION_CONFIRM, requestBody),
     {
       onSuccess: () => {
-        NotifyUtils.simpleSuccess('X+�c nhߦ�n t+�i khoߦ�n th+�nh c+�ng');
+        NotifyUtils.simpleSuccess('Xác nhận tài khoản thành công');
         updateCurrentSignupUserId(null);
         nextStep();
       },
-      onError: () => NotifyUtils.simpleFailed('X+�c nhߦ�n t+�i khoߦ�n kh+�ng th+�nh c+�ng'),
+      onError: () => NotifyUtils.simpleFailed('Xác nhận tài khoản không thành công'),
     }
   );
 
@@ -378,10 +379,10 @@ function ClientSignupStepTwo({ nextStep, userId }: { nextStep: () => void, userI
     (request) => FetchUtils.get(ResourceURL.CLIENT_REGISTRATION_RESEND_TOKEN(request.userId)),
     {
       onSuccess: () => {
-        NotifyUtils.simpleSuccess('-�+� g�+�i lߦ�i m+� x+�c nhߦ�n th+�nh c+�ng');
+        NotifyUtils.simpleSuccess('Đã gửi lại mã xác nhận thành công');
         modals.closeAll();
       },
-      onError: () => NotifyUtils.simpleFailed('G�+�i lߦ�i m+� x+�c nhߦ�n kh+�ng th+�nh c+�ng'),
+      onError: () => NotifyUtils.simpleFailed('Gửi lại mã xác nhận không thành công'),
     }
   );
 
@@ -405,11 +406,11 @@ function ClientSignupStepTwo({ nextStep, userId }: { nextStep: () => void, userI
         overlayBlur: 3,
         closeOnClickOutside: false,
         closeOnConfirm: false,
-        title: <strong>G�+�i lߦ�i m+� x+�c nhߦ�n</strong>,
-        children: <Text size="sm">Bߦ�n c+� mu�+�n g�+�i lߦ�i m+� x+�c nhߦ�n -�ߦ+n email -�+� nhߦ�p tr���+�c -�+�?</Text>,
+        title: <strong>Gửi lại mã xác nhận</strong>,
+        children: <Text size="sm">Bạn có muốn gửi lại mã xác nhận đến email đã nhập trước đó?</Text>,
         labels: {
-          cancel: '-�+�ng',
-          confirm: 'G�+�i',
+          cancel: 'Đóng',
+          confirm: 'Gửi',
         },
         confirmProps: { color: 'blue', disabled: resendRegistrationTokenApi.isLoading },
         onConfirm: () => resendRegistrationTokenApi.mutate({ userId: userId }),
@@ -424,7 +425,7 @@ function ClientSignupStepTwo({ nextStep, userId }: { nextStep: () => void, userI
       overlayOpacity: 0.55,
       overlayBlur: 3,
       closeOnClickOutside: false,
-      title: <strong>Thay -��+�i email</strong>,
+      title: <strong>Thay đổi email</strong>,
       children: <ChangeEmailModal userId={userId} />,
     });
   };
@@ -437,8 +438,8 @@ function ClientSignupStepTwo({ nextStep, userId }: { nextStep: () => void, userI
             <TextInput
               required
               radius="md"
-              label="M+� x+�c nhߦ�n"
-              placeholder="Nhߦ�p m+� x+�c nhߦ�n -�+� g�+�i"
+              label="Mã xác nhận"
+              placeholder="Nhập mã xác nhận đã gửi"
               {...form.getInputProps('token')}
             />
             <Button
@@ -446,19 +447,19 @@ function ClientSignupStepTwo({ nextStep, userId }: { nextStep: () => void, userI
               type="submit"
               disabled={MiscUtils.isEquals(initialFormValues, form.values) || confirmRegistrationApi.isLoading}
             >
-              X+�c nhߦ�n
+              Xác nhận
             </Button>
           </Stack>
         </form>
 
-        <Divider label="hoߦ+c" labelPosition="center" />
+        <Divider label="hoặc" labelPosition="center" />
 
         <Button radius="md" variant="outline" onClick={handleResendTokenButton}>
-          G�+�i m+� x+�c nhߦ�n lߦ�n n�+�a
+          Gửi mã xác nhận lần nữa
         </Button>
 
         <Button radius="md" variant="outline" onClick={handleResendTokenWithNewEmailButton}>
-          G�+�i m+� x+�c nhߦ�n lߦ�n n�+�a v�+�i email m�+�i
+          Gửi mã xác nhận lần nữa với email mới
         </Button>
       </Stack>
     </Card>
@@ -471,8 +472,8 @@ function ClientSignupStepThree() {
   return (
     <Stack align="center" sx={{ alignItems: 'center', color: theme.colors.teal[6] }}>
       <Check size={100} strokeWidth={1} />
-      <Text weight={500}>-�+� tߦ�o t+�i khoߦ�n v+� x+�c nhߦ�n th+�nh c+�ng!</Text>
-      <Button radius="md" size="lg" mt="xl" component={Link} to="/signin">-�-�ng nhߦ�p</Button>
+      <Text weight={500}>Đã tạo tài khoản và xác nhận thành công!</Text>
+      <Button radius="md" size="lg" mt="xl" component={Link} to="/signin">Đăng nhập</Button>
     </Stack>
   );
 }
@@ -485,8 +486,8 @@ function ChangeEmailModal({ userId }: { userId: number | null }) {
   };
 
   const formSchema = z.object({
-    email: z.string({ invalid_type_error: 'Vui l+�ng kh+�ng b�+� tr�+�ng' })
-      .email({ message: 'Nhߦ�p email -�+�ng -��+�nh dߦ�ng' }),
+    email: z.string({ invalid_type_error: 'Vui lòng không bỏ trống' })
+      .email({ message: 'Nhập email đúng định dạng' }),
   });
 
   const form = useForm({
@@ -502,10 +503,10 @@ function ChangeEmailModal({ userId }: { userId: number | null }) {
     ),
     {
       onSuccess: () => {
-        NotifyUtils.simpleSuccess('-�+� -��+�i email th+�nh c+�ng v+� -�+� g�+�i lߦ�i m+� x+�c nhߦ�n m�+�i');
+        NotifyUtils.simpleSuccess('Đã đổi email thành công và đã gửi lại mã xác nhận mới');
         modals.closeAll();
       },
-      onError: () => NotifyUtils.simpleFailed('Thay -��+�i email kh+�ng th+�nh c+�ng'),
+      onError: () => NotifyUtils.simpleFailed('Thay đổi email không thành công'),
     }
   );
 
@@ -522,20 +523,20 @@ function ChangeEmailModal({ userId }: { userId: number | null }) {
           data-autofocus
           required
           radius="md"
-          label="Email m�+�i"
-          placeholder="Nhߦ�p email m�+�i"
+          label="Email mới"
+          placeholder="Nhập email mới"
           {...form.getInputProps('email')}
         />
         <Group position="right">
           <Button radius="md" variant="default" onClick={modals.closeAll}>
-            -�+�ng
+            Đóng
           </Button>
           <Button
             radius="md"
             type="submit"
             disabled={MiscUtils.isEquals(initialFormValues, form.values) || changeRegistrationEmailApi.isLoading}
           >
-            Thay -��+�i v+� G�+�i
+            Thay đổi và Gửi
           </Button>
         </Group>
       </Stack>

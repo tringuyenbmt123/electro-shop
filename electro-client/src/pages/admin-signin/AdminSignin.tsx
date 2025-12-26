@@ -76,7 +76,7 @@ function AdminSignin() {
         const userResponse = await userInfoApi.mutateAsync();
         updateUser(userResponse);
 
-        navigate('/admin-nhom2-#d22cqat01-n');
+        navigate('/admin');
 
         NotifyUtils.simpleSuccess('Đăng nhập thành công');
       } catch (e) {
@@ -92,7 +92,7 @@ function AdminSignin() {
     <Box sx={{ backgroundColor: theme.colors.gray[1], height: '100vh' }}>
       <Container size={375} py={40}>
         <Stack align="center">
-          <ElectroLogo width={150} />
+          <ElectroLogo width={150}/>
 
           <Paper withBorder shadow="md" p={30} mt={30} radius="md" sx={{ width: '100%' }}>
             <form onSubmit={handleFormSubmit}>
@@ -112,7 +112,7 @@ function AdminSignin() {
                 {...form.getInputProps('password')}
               />
               <Box mt="md">
-                <RecaptchaWidget onChange={setRecaptchaToken} resetSignal={recaptchaResetSignal} />
+                <RecaptchaWidget onChange={setRecaptchaToken} resetSignal={recaptchaResetSignal}/>
               </Box>
               <Button type="submit" fullWidth mt="xl" disabled={!!user || !recaptchaToken}>
                 Đăng nhập
